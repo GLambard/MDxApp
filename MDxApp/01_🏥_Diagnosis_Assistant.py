@@ -34,7 +34,7 @@ openai.api_key = st.secrets["openai_api_key"]
 def openai_create(prompt):
 
     response = openai.Completion.create(
-    model="text-chat-davinci-002-20230126", # text-davinci-003, text-curie-001, text-chat-davinci-002-20230126
+    model="text-curie-001", # text-davinci-003, text-curie-001, text-chat-davinci-002-20230126, text-chat-davinci-002-20221122
     prompt=prompt,
     temperature=0., # 0.7
     max_tokens=750,
