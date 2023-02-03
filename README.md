@@ -1,4 +1,4 @@
-# Welcome to the MDxApp page
+# :hospital: Welcome to the MDxApp page :hospital:
 
 Here, we want to make the access to a large knowledge in 
 medical diagnosis available to an as broad as possible community of 
