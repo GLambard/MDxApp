@@ -7,4 +7,4 @@ medical professionals.
 For this, we have developed the **MDxApp** that's using **ChatGPT** 
 (a chatbot recently developed by Open AI) as a proxy to assist you in proposing 
 a quick diagnostic according to a patient's demographics, an environmental context, 
-a list of symptoms, information on 
+a list of symptoms, information on
