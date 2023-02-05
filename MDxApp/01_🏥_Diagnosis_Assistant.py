@@ -64,7 +64,7 @@ with col3:
     pregnant = st.radio("**Pregnant**", ("No", "Yes"))
 
 # Context
-context = st.text_input('**Context** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
+context = st.text_input('**History** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
                         value="", placeholder="none")
 
 # List of symptoms
@@ -98,7 +98,7 @@ if pretreatment == "":
 
 vis_prompt = "<b>Patient: </b>" + gender + ", " + str(age) + " years old.<br/>" + \
              "<b>Pregnancy: </b>" + pregnant + ".<br/>" + \
-             "<b>Context: </b>" + context + ".<br/>" + \
+             "<b>History: </b>" + context + ".<br/>" + \
              "<b>Symptoms: </b>" + symptoms + " during " + symptoms_duration + ".<br/>" + \
              "<b>Observations: </b>" + exam + ".<br/>" + \
              "<b>Existing pre-treatment: </b>" + pretreatment + ".<br/>"
@@ -107,7 +107,7 @@ st.write(vis_prompt, unsafe_allow_html=True)
 
 question_prompt = "Patient: " + gender + ", " + str(age) + " years old. " + \
                   "Pregnancy: " + pregnant + ". " + \
-                  "Context: " + context + ". " + \
+                  "History: " + context + ". " + \
                   "Symptoms: " + symptoms + " during " + symptoms_duration + ". " + \
                   "Observations: " + exam + ". " + \
                   "Existing pre-treatment: " + pretreatment + ". " + \
