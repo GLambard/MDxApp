@@ -52,12 +52,8 @@ st.markdown(
 div[class*="stRadio"] > label > div[data-testid="stMarkdownContainer"] > p {
     font-size: 18px;
 }
-div[class*="stRadio"] > options > div[data-testid="stMarkdownContainer"] > p {
-    font-size: 20px;
-}
     </style>
     """, unsafe_allow_html=True)
-
 st.markdown(
     """<style>
 div[class*="stNumberInput"] > label > div[data-testid="stMarkdownContainer"] > p {
@@ -67,7 +63,7 @@ div[class*="stNumberInput"] > label > div[data-testid="stMarkdownContainer"] > p
     """, unsafe_allow_html=True)
 st.markdown(
     """<style>
-div[class*="stTextInput"] > label > div[data-testid="stMarkdownContainer"] > p {
+div[class*="stTextArea"] > label > div[data-testid="stMarkdownContainer"] > p {
     font-size: 18px;
 }
     </style>
@@ -102,30 +98,34 @@ with col3:
     st.radio("**Pregnant**", ("No", "Yes"), key='pregnant', disabled=st.session_state.disabled)
 
 # Context
-ctx_str = st.text_input('**History** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
+ctx_str = st.text_area('**History** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
               value="", placeholder="none", key='context', 
               help=":green[**Enter patient's known background information, including their past medical conditions, medications, " + \
                    "family history, lifestyle, and other relevant information that can help in diagnosis and treatment**]")
 
 # List of symptoms
-symp_str = st.text_input("**Symptoms** *(Example: high grade fever, lethargy, headache, abdominal pain)*", 
+symp_str = st.text_area("**Symptoms** *(Example: high grade fever, lethargy, headache, abdominal pain during 2 days)*", 
               value="", placeholder="none", key='symptoms', 
-              help="$\\textcolor{#228B22}{\mathrm{" + \
-                   "Enter a list of symptoms indicating the presence of an underlying medical condition".replace(" ", " \space ") + \
-                   "}}$")  
+              help=":green[**List all symptoms indicating the presence of an underlying medical condition**]")
 
 # List of observations at exam
-exam_str = st.text_input("**Observations** *(Example: petechial lesions on the palms of his hands and feet, bug bites)*", 
-              value="", placeholder="none", key='exam')
+exam_str = st.text_area("**Examination findings** *(Example: petechial lesions on the palms of his hands and feet, bug bites)*", 
+              value="", placeholder="none", key='exam', 
+              help=":green[**List all the information gathered through visual inspection, palpation, " + \
+                   "percussion, and auscultation during the examination**]")
 
-# Existing pre-treatment
-pret_str = st.text_input("**Existing treatment(s)** *(Example: compliant to HIV medications)*", 
-              value="", placeholder="none", key='pretreat')
+# Laboratory test results
+lab_str = st.text_area("**Laboratory test results** *(Example: w/IgE levels > 3000 IU/m)*", 
+              value="", placeholder="none", key='labresults', 
+              help=":green[**List output of tests performed on samples of bodily fluids, tissues, " + \
+                   "or other substances to help diagnose, monitor, or treat medical conditions. " + \
+                   "These tests can include blood tests, urine tests, imaging tests, biopsies, " + \
+                   "and other diagnostic procedures**]")
 
 st.subheader(":clipboard: **Summary**")
 # Diagnostic
 
-report_list = [ctx_str, symp_str, exam_str, pret_str]
+report_list = [ctx_str, symp_str, exam_str, lab_str]
 corr_list = ["none", "none", "none", "none"]
 for ic in range(0,len(report_list)):
     if report_list[ic] == "":
@@ -136,8 +136,8 @@ vis_prompt = "<p style=\"font-size:18px;\">" + \
              "<b>Pregnancy: </b>" + st.session_state.pregnant + ".<br/>" + \
              "<b>History: </b>" + report_list[0] + ".<br/>" + \
              "<b>Symptoms: </b>" + report_list[1] + ".<br/>" + \
-             "<b>Observations: </b>" + report_list[2] + ".<br/>" + \
-             "<b>Existing pre-treatment: </b>" + report_list[3] + ".<br/> </p>"
+             "<b>Examination findings: </b>" + report_list[2] + ".<br/>" + \
+             "<b>Laboratory test results: </b>" + report_list[3] + ".<br/> </p>"
 
 st.write(vis_prompt, unsafe_allow_html=True) 
 
@@ -145,8 +145,8 @@ question_prompt = "Patient: " + st.session_state.gender + ", " + str(st.session_
                   "Pregnancy: " + st.session_state.pregnant + ". " + \
                   "History: " + report_list[0] + ". " + \
                   "Symptoms: " + report_list[1] + ". " + \
-                  "Observations: " + report_list[2] + ". " + \
-                  "Existing pre-treatment: " + report_list[3] + ". " + \
+                  "Examination findings: " + report_list[2] + ". " + \
+                  "Laboratory test results: " + report_list[3] + ". " + \
                   "What is the likely diagnosis ? " + \
                   "Then, insert '<br/><br/>' in your response. " + \
                   "And, propose a treatment formatted as an ordered list. " 
