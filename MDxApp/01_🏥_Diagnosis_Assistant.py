@@ -20,8 +20,8 @@ import openai
 
 # Quick FIX for SSL certificate localization
 # Remove if out of DMZ
-#os.environ["REQUESTS_CA_BUNDLE"] = '/usr/local/share/ca-certificates/extras/nims_proxy_copy.pem'
-#os.environ["SSL_CERT_FILE"] = '/usr/local/share/ca-certificates/extras/nims_proxy_copy.pem'
+os.environ["REQUESTS_CA_BUNDLE"] = '/usr/local/share/ca-certificates/extras/nims_proxy_copy.pem'
+os.environ["SSL_CERT_FILE"] = '/usr/local/share/ca-certificates/extras/nims_proxy_copy.pem'
 
 #if you have OpenAI API key as an environment variable, enable the below
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -46,86 +46,125 @@ def openai_create(prompt):
 
     return response.choices[0].text
 
-# Diagnostic Assistant 
-st.title("Medical Diagnosis Support Tool (DxST)")
+## Font size configs
+st.markdown(
+    """<style>
+div[class*="stRadio"] > label > div[data-testid="stMarkdownContainer"] > p {
+    font-size: 18px;
+}
+div[class*="stRadio"] > options > div[data-testid="stMarkdownContainer"] > p {
+    font-size: 20px;
+}
+    </style>
+    """, unsafe_allow_html=True)
 
-st.subheader("Report: ")
+st.markdown(
+    """<style>
+div[class*="stNumberInput"] > label > div[data-testid="stMarkdownContainer"] > p {
+    font-size: 18px;
+}
+    </style>
+    """, unsafe_allow_html=True)
+st.markdown(
+    """<style>
+div[class*="stTextInput"] > label > div[data-testid="stMarkdownContainer"] > p {
+    font-size: 18px;
+}
+    </style>
+    """, unsafe_allow_html=True)
+####
+
+# Diagnostic Assistant 
+st.title("**Medical Diagnosis Support Tool (DxST)**")
+
+st.subheader(":black_nib: **Report**")
 # Define columns
 col1, col2, col3 = st.columns(3, gap="large")
 
+# Store the initial value of the pregnancy widget access in session state
+if "disabled" not in st.session_state:
+    st.session_state.disabled = False
+
 # Gender selector 
 with col1:
-    gender = st.radio("**Gender**", ("Male", "Female"))
+    st.radio("**Gender**", ("Male", "Female"), key='gender')
 # Age selector 
 with col2:
-    age = st.number_input("**Age**", min_value= 0, max_value= 99, step=1)
+    st.number_input("**Age**", min_value= 0, max_value= 99, step=1, key='age')
 # Pregnancy
+if st.session_state.gender == 'Male':
+    st.session_state.disabled = True
+    st.session_state.pregnant = "No"
+else: 
+    st.session_state.disabled = False
+
 with col3: 
-    pregnant = st.radio("**Pregnant**", ("No", "Yes"))
+    st.radio("**Pregnant**", ("No", "Yes"), key='pregnant', disabled=st.session_state.disabled)
 
 # Context
-context = st.text_input('**History** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
-                        value="", placeholder="none")
+ctx_str = st.text_input('**History** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
+              value="", placeholder="none", key='context', 
+              help=":green[**Enter patient's known background information, including their past medical conditions, medications, " + \
+                   "family history, lifestyle, and other relevant information that can help in diagnosis and treatment**]")
 
 # List of symptoms
-symptoms = st.text_input("**Symptoms** *(Example: high grade fever, lethargy, headache, abdominal pain)*", 
-                         value="", placeholder="none") 
-
-# Duration of symptoms
-symptoms_duration = st.text_input("**Duration of symptoms** *(Example: 2 hours/days)*", 
-                                  value="", placeholder="unknown") 
+symp_str = st.text_input("**Symptoms** *(Example: high grade fever, lethargy, headache, abdominal pain)*", 
+              value="", placeholder="none", key='symptoms', 
+              help="$\\textcolor{#228B22}{\mathrm{" + \
+                   "Enter a list of symptoms indicating the presence of an underlying medical condition".replace(" ", " \space ") + \
+                   "}}$")  
 
 # List of observations at exam
-exam = st.text_input("**Observations** *(Example: petechial lesions on the palms of his hands and feet, bug bites)*", 
-                     value="", placeholder="none")
+exam_str = st.text_input("**Observations** *(Example: petechial lesions on the palms of his hands and feet, bug bites)*", 
+              value="", placeholder="none", key='exam')
 
 # Existing pre-treatment
-pretreatment = st.text_input("**Existing treatment(s)** *(Example: compliant to HIV medications)*", 
-                             value="", placeholder="none")
+pret_str = st.text_input("**Existing treatment(s)** *(Example: compliant to HIV medications)*", 
+              value="", placeholder="none", key='pretreat')
 
-st.subheader("Summary: ")
+st.subheader(":clipboard: **Summary**")
 # Diagnostic
-if context == "":
-    context = "none"
-if symptoms == "": 
-    symptoms = "none"
-if symptoms_duration == "": 
-    symptoms_duration = "unknown"
-if exam == "":
-    exam = "none"
-if pretreatment == "":
-    pretreatment = "none"
 
-vis_prompt = "<b>Patient: </b>" + gender + ", " + str(age) + " years old.<br/>" + \
-             "<b>Pregnancy: </b>" + pregnant + ".<br/>" + \
-             "<b>History: </b>" + context + ".<br/>" + \
-             "<b>Symptoms: </b>" + symptoms + " during " + symptoms_duration + ".<br/>" + \
-             "<b>Observations: </b>" + exam + ".<br/>" + \
-             "<b>Existing pre-treatment: </b>" + pretreatment + ".<br/>"
+report_list = [ctx_str, symp_str, exam_str, pret_str]
+corr_list = ["none", "none", "none", "none"]
+for ic in range(0,len(report_list)):
+    if report_list[ic] == "":
+        report_list[ic] = corr_list[ic]
+
+vis_prompt = "<p style=\"font-size:18px;\">" + \
+             "<b>Patient: </b>" + st.session_state.gender + ", " + str(st.session_state.age) + " years old.<br/>" + \
+             "<b>Pregnancy: </b>" + st.session_state.pregnant + ".<br/>" + \
+             "<b>History: </b>" + report_list[0] + ".<br/>" + \
+             "<b>Symptoms: </b>" + report_list[1] + ".<br/>" + \
+             "<b>Observations: </b>" + report_list[2] + ".<br/>" + \
+             "<b>Existing pre-treatment: </b>" + report_list[3] + ".<br/> </p>"
 
 st.write(vis_prompt, unsafe_allow_html=True) 
 
-question_prompt = "Patient: " + gender + ", " + str(age) + " years old. " + \
-                  "Pregnancy: " + pregnant + ". " + \
-                  "History: " + context + ". " + \
-                  "Symptoms: " + symptoms + " during " + symptoms_duration + ". " + \
-                  "Observations: " + exam + ". " + \
-                  "Existing pre-treatment: " + pretreatment + ". " + \
+question_prompt = "Patient: " + st.session_state.gender + ", " + str(st.session_state.age) + " years old. " + \
+                  "Pregnancy: " + st.session_state.pregnant + ". " + \
+                  "History: " + report_list[0] + ". " + \
+                  "Symptoms: " + report_list[1] + ". " + \
+                  "Observations: " + report_list[2] + ". " + \
+                  "Existing pre-treatment: " + report_list[3] + ". " + \
                   "What is the likely diagnosis ? " + \
                   "Then, insert '<br/><br/>' in your response. " + \
                   "And, propose a treatment formatted as an ordered list. " 
                   # Last two lines aren't often understandable by models other than DaVinci-003
 
-st.subheader("Diagnostic: ")
+st.subheader(":computer: :speech_balloon: :pill: **Diagnostic**")
 if st.button('**Submit**'):
-    if symptoms == "none":
-        st.write("Please, enter some symptoms before submission.")
+    if report_list[2] == "none":
+        st.write("<p style=\"font-size:18px;\">Please, enter at least some symptoms before submission.</p>", 
+                 unsafe_allow_html=True)
     else:
         with st.spinner('Please wait...'):
             try:
                 diagnostic = openai_create(prompt=question_prompt)
                 st.write(diagnostic, unsafe_allow_html=True)
             except: 
-                st.write("The server do not respond or is overloaded with requests... Try again.")
+                st.write("<p style=\"font-size:18px;\">The server does not respond or is overloaded with requests... Try again.</p>", 
+                         unsafe_allow_html=True)
 else: 
-    st.write("No diagnostic yet, please click **Submit**.")
+    st.write("<p style=\"font-size:18px;\">No diagnostic yet, please click **Submit** above.</p>", 
+             unsafe_allow_html=True)
