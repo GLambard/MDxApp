@@ -1,8 +1,14 @@
 import streamlit as st
 
+# Trick to preserve the state of your widgets across pages
+for k, v in st.session_state.items():
+    st.session_state[k] = v
+##
+
 st.set_page_config(
     page_title="About",
     page_icon="📰",
+    layout="wide"
 )
 
 st.header("About")

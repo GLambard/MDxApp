@@ -5,9 +5,15 @@
 # Write a streamlit web app. The main title is "Diagnostic Assistant". It contains a gender selector, an age selector from 0 to 99+ years old.
 import streamlit as st 
 
+# Trick to preserve the state of your widgets across pages
+for k, v in st.session_state.items():
+    st.session_state[k] = v
+##
+
 st.set_page_config(
     page_title="Diagnosis_Assistant",
     page_icon="🏥",
+    layout="wide"
 )
 
 # From https://github.com/blackary/st_pages
@@ -77,16 +83,42 @@ st.subheader(":black_nib: **Report**")
 # Define columns
 col1, col2, col3 = st.columns(3, gap="large")
 
-# Store the initial value of the pregnancy widget access in session state
+# Store initial values in session state
 if "disabled" not in st.session_state:
     st.session_state.disabled = False
 
+genders_list = ["Male", "Female"]
+gender_id = 0
+if "gender" in st.session_state:
+    gender_id = genders_list.index(st.session_state.gender)
+
+age_val = 0
+if "age" in st.session_state:
+    age_val = st.session_state.age
+
+ctx_val = ""
+if "context" in st.session_state:
+    ctx_val = st.session_state.context
+
+symp_val = ""
+if "symptoms" in st.session_state:
+    symp_val = st.session_state.symptoms
+
+exam_val = ""
+if "exam" in st.session_state:
+    exam_val = st.session_state.exam
+
+lab_val = ""
+if "labresults" in st.session_state:
+    lab_val = st.session_state.labresults
+##
+
 # Gender selector 
 with col1:
-    st.radio("**Gender**", ("Male", "Female"), key='gender')
+    st.session_state.gender = st.radio("**Gender**", genders_list, index=gender_id)
 # Age selector 
 with col2:
-    st.number_input("**Age**", min_value= 0, max_value= 99, step=1, key='age')
+    st.session_state.age = st.number_input("**Age**", min_value= 0, max_value= 99, step=1, value=age_val)
 # Pregnancy
 if st.session_state.gender == 'Male':
     st.session_state.disabled = True
@@ -95,28 +127,28 @@ else:
     st.session_state.disabled = False
 
 with col3: 
-    st.radio("**Pregnant**", ("No", "Yes"), key='pregnant', disabled=st.session_state.disabled)
+    st.session_state.pregnant = st.radio("**Pregnant**", ("No", "Yes"), disabled=st.session_state.disabled)
 
 # Context
-ctx_str = st.text_area('**History** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
-              value="", placeholder="none", key='context', 
+st.session_state.context = st.text_area('**History** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
+              value=ctx_val, placeholder="none", 
               help=":green[**Enter patient's known background information, including their past medical conditions, medications, " + \
                    "family history, lifestyle, and other relevant information that can help in diagnosis and treatment**]")
 
 # List of symptoms
-symp_str = st.text_area("**Symptoms** *(Example: high grade fever, lethargy, headache, abdominal pain during 2 days)*", 
-              value="", placeholder="none", key='symptoms', 
+st.session_state.symptoms = st.text_area("**Symptoms** *(Example: high-grade fever, lethargy, headache, and abdominal pain for two days)*", 
+              value=symp_val, placeholder="none", 
               help=":green[**List all symptoms indicating the presence of an underlying medical condition**]")
 
 # List of observations at exam
-exam_str = st.text_area("**Examination findings** *(Example: petechial lesions on the palms of his hands and feet, bug bites)*", 
-              value="", placeholder="none", key='exam', 
+st.session_state.exam = st.text_area("**Examination findings** *(Example: petechial lesions on the palms of his hands and feet, bug bites)*", 
+              value=exam_val, placeholder="none", 
               help=":green[**List all the information gathered through visual inspection, palpation, " + \
                    "percussion, and auscultation during the examination**]")
 
 # Laboratory test results
-lab_str = st.text_area("**Laboratory test results** *(Example: w/IgE levels > 3000 IU/m)*", 
-              value="", placeholder="none", key='labresults', 
+st.session_state.labresults = st.text_area("**Laboratory test results** *(Example: w/IgE levels > 3000 IU/m)*", 
+              value=lab_val, placeholder="none", 
               help=":green[**List output of tests performed on samples of bodily fluids, tissues, " + \
                    "or other substances to help diagnose, monitor, or treat medical conditions. " + \
                    "These tests can include blood tests, urine tests, imaging tests, biopsies, " + \
@@ -125,7 +157,8 @@ lab_str = st.text_area("**Laboratory test results** *(Example: w/IgE levels > 30
 st.subheader(":clipboard: **Summary**")
 # Diagnostic
 
-report_list = [ctx_str, symp_str, exam_str, lab_str]
+report_list = [st.session_state.context, st.session_state.symptoms, 
+               st.session_state.exam, st.session_state.labresults]
 corr_list = ["none", "none", "none", "none"]
 for ic in range(0,len(report_list)):
     if report_list[ic] == "":
@@ -154,14 +187,14 @@ question_prompt = "Patient: " + st.session_state.gender + ", " + str(st.session_
 
 st.subheader(":computer: :speech_balloon: :pill: **Diagnostic**")
 if st.button('**Submit**'):
-    if report_list[2] == "none":
+    if report_list[1] == "none":
         st.write("<p style=\"font-size:18px;\">Please, enter at least some symptoms before submission.</p>", 
                  unsafe_allow_html=True)
     else:
         with st.spinner('Please wait...'):
             try:
                 diagnostic = openai_create(prompt=question_prompt)
-                st.write(diagnostic, unsafe_allow_html=True)
+                st.write(diagnostic.replace("<|im_end|>", ""), unsafe_allow_html=True)
             except: 
                 st.write("<p style=\"font-size:18px;\">The server does not respond or is overloaded with requests... Try again.</p>", 
                          unsafe_allow_html=True)
