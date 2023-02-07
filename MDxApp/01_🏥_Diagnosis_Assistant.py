@@ -96,6 +96,11 @@ age_val = 0
 if "age" in st.session_state:
     age_val = st.session_state.age
 
+pregnant_list = ["No", "Yes"]
+pregnant_id = 0
+if "pregnant" in st.session_state:
+    pregnant_id = pregnant_list.index(st.session_state.pregnant)
+
 ctx_val = ""
 if "context" in st.session_state:
     ctx_val = st.session_state.context
@@ -127,7 +132,7 @@ else:
     st.session_state.disabled = False
 
 with col3: 
-    st.session_state.pregnant = st.radio("**Pregnant**", ("No", "Yes"), disabled=st.session_state.disabled)
+    st.session_state.pregnant = st.radio("**Pregnant**", pregnant_list, index=pregnant_id, disabled=st.session_state.disabled)
 
 # Context
 st.session_state.context = st.text_area('**History** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
