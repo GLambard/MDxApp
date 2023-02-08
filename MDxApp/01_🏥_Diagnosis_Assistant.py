@@ -5,17 +5,6 @@
 # Write a streamlit web app. The main title is "Diagnostic Assistant". It contains a gender selector, an age selector from 0 to 99+ years old.
 import streamlit as st 
 
-# Trick to preserve the state of your widgets across pages
-for k, v in st.session_state.items():
-    st.session_state[k] = v
-##
-
-st.set_page_config(
-    page_title="Diagnosis_Assistant",
-    page_icon="🏥",
-    layout="wide"
-)
-
 # From https://github.com/blackary/st_pages
 # Pages config in .streamlit/pages.toml
 #from st_pages import show_pages_from_config
@@ -23,6 +12,11 @@ st.set_page_config(
 
 import os
 import openai
+
+# Trick to preserve the state of your widgets across pages
+for k, v in st.session_state.items():
+    st.session_state[k] = v
+##
 
 # Quick FIX for SSL certificate localization
 # Remove if out of DMZ
@@ -51,6 +45,12 @@ def openai_create(prompt):
     )
 
     return response.choices[0].text
+
+st.set_page_config(
+    page_title="Diagnosis_Assistant",
+    page_icon="🏥",
+    layout="wide"
+)
 
 ## Font size configs
 st.markdown(
@@ -88,13 +88,15 @@ if "disabled" not in st.session_state:
     st.session_state.disabled = False
 
 genders_list = ["Male", "Female"]
-gender_id = 0
 if "gender" in st.session_state:
     gender_id = genders_list.index(st.session_state.gender)
+else:
+    gender_id = 0
 
-age_val = 0
 if "age" in st.session_state:
     age_val = st.session_state.age
+else:
+    age_val = 0
 
 pregnant_list = ["No", "Yes"]
 pregnant_id = 0
@@ -104,26 +106,33 @@ if "pregnant" in st.session_state:
 ctx_val = ""
 if "context" in st.session_state:
     ctx_val = st.session_state.context
+else: 
+    ctx_val = ""
 
-symp_val = ""
 if "symptoms" in st.session_state:
     symp_val = st.session_state.symptoms
+else:
+    symp_val = ""
 
-exam_val = ""
 if "exam" in st.session_state:
     exam_val = st.session_state.exam
+else:
+    exam_val = ""
 
-lab_val = ""
 if "labresults" in st.session_state:
     lab_val = st.session_state.labresults
+else:
+    lab_val = ""
 ##
 
 # Gender selector 
 with col1:
-    st.session_state.gender = st.radio("**Gender**", genders_list, index=gender_id)
+    #st.session_state.gender = 
+    st.radio("**Gender**", genders_list, key='gender')#, index=gender_id)
 # Age selector 
 with col2:
-    st.session_state.age = st.number_input("**Age**", min_value= 0, max_value= 99, step=1, value=age_val)
+    #st.session_state.age = 
+    st.number_input("**Age**", min_value= 0, max_value= 99, step=1, value=age_val)
 # Pregnancy
 if st.session_state.gender == 'Male':
     st.session_state.disabled = True
@@ -132,7 +141,7 @@ else:
     st.session_state.disabled = False
 
 with col3: 
-    st.session_state.pregnant = st.radio("**Pregnant**", pregnant_list, index=pregnant_id, disabled=st.session_state.disabled)
+    st.session_state.pregnant = st.radio("**Pregnant**", pregnant_list, disabled=st.session_state.disabled , index=pregnant_id)
 
 # Context
 st.session_state.context = st.text_area('**History** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
