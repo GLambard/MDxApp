@@ -15,7 +15,7 @@ import openai
 
 # Trick to preserve the state of your widgets across pages
 for k, v in st.session_state.items():
-    st.session_state[k] = v
+    st.session_state[k] = v 
 ##
 
 # Quick FIX for SSL certificate localization
@@ -34,7 +34,7 @@ openai.api_key = st.secrets["openai_api_key"]
 def openai_create(prompt):
 
     response = openai.Completion.create(
-    model="text-chat-davinci-002-20221122", # text-davinci-003, text-curie-001, text-chat-davinci-002-20230126, text-chat-davinci-002-20221122
+    model="text-davinci-002", # text-davinci-003, text-curie-001, text-chat-davinci-002-20230126, text-chat-davinci-002-20221122
     prompt=prompt,
     temperature=0., # 0.7
     max_tokens=750,
