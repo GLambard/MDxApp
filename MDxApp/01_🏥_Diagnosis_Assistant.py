@@ -86,22 +86,9 @@ col1, col2, col3 = st.columns(3, gap="large")
 # Store initial values in session state
 if "disabled" not in st.session_state:
     st.session_state.disabled = False
-
+# Declare lists
 genders_list = ["Male", "Female"]
-if "gender" in st.session_state:
-    gender_id = genders_list.index(st.session_state.gender)
-else:
-    gender_id = 0
-
-if "age" in st.session_state:
-    age_val = st.session_state.age
-else:
-    age_val = 0
-
 pregnant_list = ["No", "Yes"]
-pregnant_id = 0
-if "pregnant" in st.session_state:
-    pregnant_id = pregnant_list.index(st.session_state.pregnant)
 
 ctx_val = ""
 if "context" in st.session_state:
@@ -127,21 +114,20 @@ else:
 
 # Gender selector 
 with col1:
-    #st.session_state.gender = 
-    st.radio("**Gender**", genders_list, key='gender')#, index=gender_id)
+    st.radio("**Gender**", genders_list, key='gender') #, index=gender_id)
 # Age selector 
 with col2:
-    #st.session_state.age = 
-    st.number_input("**Age**", min_value= 0, max_value= 99, step=1, value=age_val)
+    st.number_input("**Age**", min_value= 0, max_value= 99, step=1, key="age") #, value=age_val)
 # Pregnancy
 if st.session_state.gender == 'Male':
     st.session_state.disabled = True
-    st.session_state.pregnant = "No"
+    if "pregnant" in st.session_state:
+        st.session_state.pregnant = "No"
 else: 
     st.session_state.disabled = False
 
 with col3: 
-    st.session_state.pregnant = st.radio("**Pregnant**", pregnant_list, disabled=st.session_state.disabled , index=pregnant_id)
+    st.radio("**Pregnant**", pregnant_list, disabled=st.session_state.disabled, key="pregnant") #, index=pregnant_id)
 
 # Context
 st.session_state.context = st.text_area('**History** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
