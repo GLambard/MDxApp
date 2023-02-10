@@ -34,7 +34,7 @@ openai.api_key = st.secrets["openai_api_key"]
 def openai_create(prompt):
 
     response = openai.Completion.create(
-    model="text-davinci-002", # text-davinci-003, text-curie-001, text-chat-davinci-002-20230126, text-chat-davinci-002-20221122
+    model="text-davinci-001", # text-davinci-003, text-curie-001, text-chat-davinci-002-20230126, text-chat-davinci-002-20221122
     prompt=prompt,
     temperature=0., # 0.7
     max_tokens=750,
@@ -89,35 +89,14 @@ if "disabled" not in st.session_state:
 # Declare lists
 genders_list = ["Male", "Female"]
 pregnant_list = ["No", "Yes"]
-
-ctx_val = ""
-if "context" in st.session_state:
-    ctx_val = st.session_state.context
-else: 
-    ctx_val = ""
-
-if "symptoms" in st.session_state:
-    symp_val = st.session_state.symptoms
-else:
-    symp_val = ""
-
-if "exam" in st.session_state:
-    exam_val = st.session_state.exam
-else:
-    exam_val = ""
-
-if "labresults" in st.session_state:
-    lab_val = st.session_state.labresults
-else:
-    lab_val = ""
 ##
 
 # Gender selector 
 with col1:
-    st.radio("**Gender**", genders_list, key='gender') #, index=gender_id)
+    st.radio("**Gender**", genders_list, key='gender')
 # Age selector 
 with col2:
-    st.number_input("**Age**", min_value= 0, max_value= 99, step=1, key="age") #, value=age_val)
+    st.number_input("**Age**", min_value= 0, max_value= 99, step=1, key="age")
 # Pregnancy
 if st.session_state.gender == 'Male':
     st.session_state.disabled = True
@@ -127,32 +106,32 @@ else:
     st.session_state.disabled = False
 
 with col3: 
-    st.radio("**Pregnant**", pregnant_list, disabled=st.session_state.disabled, key="pregnant") #, index=pregnant_id)
+    st.radio("**Pregnant**", pregnant_list, disabled=st.session_state.disabled, key="pregnant")
 
 # Context
-st.session_state.context = st.text_area('**History** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
-              value=ctx_val, placeholder="none", 
-              help=":green[**Enter patient's known background information, including their past medical conditions, medications, " + \
-                   "family history, lifestyle, and other relevant information that can help in diagnosis and treatment**]")
+st.text_area('**History** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
+             placeholder="none", key="context", 
+             help=":green[**Enter patient's known background information, including their past medical conditions, medications, " + \
+                  "family history, lifestyle, and other relevant information that can help in diagnosis and treatment**]")
 
 # List of symptoms
-st.session_state.symptoms = st.text_area("**Symptoms** *(Example: high-grade fever, lethargy, headache, and abdominal pain for two days)*", 
-              value=symp_val, placeholder="none", 
-              help=":green[**List all symptoms indicating the presence of an underlying medical condition**]")
+st.text_area("**Symptoms** *(Example: high-grade fever, lethargy, headache, and abdominal pain for two days)*", 
+             placeholder="none", key="symptoms", 
+             help=":green[**List all symptoms indicating the presence of an underlying medical condition**]")
 
 # List of observations at exam
-st.session_state.exam = st.text_area("**Examination findings** *(Example: petechial lesions on the palms of his hands and feet, bug bites)*", 
-              value=exam_val, placeholder="none", 
-              help=":green[**List all the information gathered through visual inspection, palpation, " + \
-                   "percussion, and auscultation during the examination**]")
+st.text_area("**Examination findings** *(Example: petechial lesions on the palms of his hands and feet, bug bites)*", 
+             placeholder="none", key="exam", 
+             help=":green[**List all the information gathered through visual inspection, palpation, " + \
+                  "percussion, and auscultation during the examination**]")
 
 # Laboratory test results
-st.session_state.labresults = st.text_area("**Laboratory test results** *(Example: w/IgE levels > 3000 IU/m)*", 
-              value=lab_val, placeholder="none", 
-              help=":green[**List output of tests performed on samples of bodily fluids, tissues, " + \
-                   "or other substances to help diagnose, monitor, or treat medical conditions. " + \
-                   "These tests can include blood tests, urine tests, imaging tests, biopsies, " + \
-                   "and other diagnostic procedures**]")
+st.text_area("**Laboratory test results** *(Example: w/IgE levels > 3000 IU/m)*", 
+             placeholder="none", key="labresults", 
+             help=":green[**List output of tests performed on samples of bodily fluids, tissues, " + \
+                  "or other substances to help diagnose, monitor, or treat medical conditions. " + \
+                  "These tests can include blood tests, urine tests, imaging tests, biopsies, " + \
+                  "and other diagnostic procedures**]")
 
 st.subheader(":clipboard: **Summary**")
 # Diagnostic
@@ -193,11 +172,14 @@ if st.button('**Submit**'):
     else:
         with st.spinner('Please wait...'):
             try:
-                diagnostic = openai_create(prompt=question_prompt)
-                st.write(diagnostic.replace("<|im_end|>", ""), unsafe_allow_html=True)
+                st.session_state.diagnostic = openai_create(prompt=question_prompt)
+                st.write(st.session_state.diagnostic.replace("<|im_end|>", ""), unsafe_allow_html=True)
             except: 
                 st.write("<p style=\"font-size:18px;\">The server does not respond or is overloaded with requests... Try again.</p>", 
                          unsafe_allow_html=True)
 else: 
-    st.write("<p style=\"font-size:18px;\">No diagnostic yet, please click **Submit** above.</p>", 
-             unsafe_allow_html=True)
+    if "diagnostic" in st.session_state:
+        st.write(st.session_state.diagnostic.replace("<|im_end|>", ""), unsafe_allow_html=True)
+    else: 
+        st.write("<p style=\"font-size:18px;\">No diagnostic yet, please click **Submit** above.</p>", 
+                 unsafe_allow_html=True)
