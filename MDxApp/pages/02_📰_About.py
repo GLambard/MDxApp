@@ -1,5 +1,5 @@
 import streamlit as st
-from PIL import Image
+import os
 
 # Trick to preserve the state of your widgets across pages
 for k, v in st.session_state.items():
@@ -12,38 +12,12 @@ st.set_page_config(
     layout="wide"
 )
 
-""" with st.sidebar.container():
-    image = Image.open('/Users/guillaumelambard/Documents/OpenAI/Projects/MDxApp/Materials/MDxApp_logo_v2_64.png')
-    st.image(image, width=64, use_column_width=True) """
-
-def add_logo():
-    st.markdown(
-        """
-        <style>
-            [data-testid="stSidebarNav"] {
-                background-image: url(http://placekitten.com/200/200);
-                background-repeat: no-repeat;
-                padding-top: 120px;
-                background-position: 20px 20px;
-            }
-            [data-testid="stSidebarNav"]::before {
-                content: "";
-                margin-left: 20px;
-                margin-top: 20px;
-                font-size: 30px;
-                position: relative;
-                top: 100px;
-            }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-add_logo()
+# Use Local logo File
+path = os.path.dirname(__file__)
+file_name = path+"/../../Materials/MDxApp_logo_v2_256.png"
+st.sidebar.image(file_name, caption= '', width=256)
 
 st.header("About")
-
-#st.sidebar.success("Select a demo above.")
 
 st.markdown(
     """
