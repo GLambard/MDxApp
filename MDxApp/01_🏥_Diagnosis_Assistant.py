@@ -1,16 +1,9 @@
-#import ptvsd
-#ptvsd.enable_attach(address=('localhost', 8501))
-#ptvsd.wait_for_attach() # Only include this line if you always want to attach the debugger
-
-# Write a streamlit web app. The main title is "Diagnostic Assistant". It contains a gender selector, an age selector from 0 to 99+ years old.
 import streamlit as st 
-
-# From https://github.com/blackary/st_pages
-# Pages config in .streamlit/pages.toml
-#from st_pages import show_pages_from_config
-#show_pages_from_config()
+from streamlit.components.v1 import html
+from streamlit_extras.buy_me_a_coffee import button
 
 import os
+
 import openai
 
 # Trick to preserve the state of your widgets across pages
@@ -23,24 +16,19 @@ for k, v in st.session_state.items():
 os.environ["REQUESTS_CA_BUNDLE"] = '/usr/local/share/ca-certificates/extras/nims_proxy_copy.pem'
 os.environ["SSL_CERT_FILE"] = '/usr/local/share/ca-certificates/extras/nims_proxy_copy.pem'
 
-#if you have OpenAI API key as an environment variable, enable the below
+#OpenAI API key as an environment variable
 openai.api_key = os.getenv("OPENAI_API_KEY")
-
-#if you have OpenAI API key as a string, enable the below
-# From https://blog.streamlit.io/secrets-in-sharing-apps/
-# secrets config in .streamlit/secrets.toml
 openai.api_key = st.secrets["openai_api_key"]
 
 def openai_create(prompt):
 
     response = openai.Completion.create(
-    model="text-davinci-001", # text-davinci-003, text-curie-001, text-chat-davinci-002-20230126, text-chat-davinci-002-20221122
+    model=st.secrets["openai_api_model"],
     prompt=prompt,
-    temperature=0., # 0.7
-    max_tokens=750,
-    #top_p=1,
-    frequency_penalty=0,
-    presence_penalty=0.6, 
+    temperature=float(st.secrets["openai_api_temp"]), 
+    max_tokens=int(st.secrets["openai_api_maxtok"]),
+    frequency_penalty=int(st.secrets["openai_api_freqp"]),
+    presence_penalty=float(st.secrets["openai_api_presp"]), 
     stop = None
     )
 
@@ -52,13 +40,60 @@ st.set_page_config(
     layout="wide"
 )
 
-# Use Local logo File
-path = os.path.dirname(__file__)
-file_name = path+"/../Materials/MDxApp_logo_v2_256.png"
-st.sidebar.image(file_name, caption= '', width=256)
+# Works with streamlit==1.17.0
+# TODO: Review class names for future versions
+st.markdown("""
+  <style>
+      ul[class="css-j7qwjs e1fqkh3o7"]{
+        position: relative;
+        padding-top: 2rem;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+      }
+      .css-17lntkn {
+        font-weight: bold;
+        font-size: 18px;
+        color: grey;
+      }
+      .css-pkbazv {
+        font-weight: bold;
+        font-size: 18px;
+      }
+  </style>""", unsafe_allow_html=True)
 
-# Diagnostic Assistant 
-st.title("**Medical Diagnosis Support Tool (DxST)**")
+path = os.path.dirname(__file__)
+
+# Buy me a coffee - MDxApp support
+button = f"""<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="geonosislaX" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>"""
+with st.sidebar:
+    st.markdown("<h3 style='text-align: center; color: black;'>Let's keep MDxApp free!</h3>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align: left; color: black;'>By clicking here:</h4>", unsafe_allow_html=True)
+    html(button, height=70, width=220)
+    st.markdown("<h4 style='text-align: left; color: black;'>Or use this QR code:</h4>", unsafe_allow_html=True)
+    qr_name = path+"/../Materials/bmc_qr.png"
+    st.image(qr_name, caption= '', width = 220)
+
+# Use GitHub logo file
+logo_name = path+"/../Materials/MDxApp_logo_v2_256.png"
+
+# Define columns
+t1, t2 = st.columns([1,3], gap="large")
+with t1: 
+    st.image(logo_name, caption= '', width=256)
+with t2:
+    st.header("**Medical Diagnosis Assistant**")
+
+st.write(
+    """<style>
+    [data-testid="stHorizontalBlock"] {
+        align-items: center;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 ## Font size configs
 st.markdown(
@@ -148,26 +183,26 @@ for ic in range(0,len(report_list)):
     if report_list[ic] == "":
         report_list[ic] = corr_list[ic]
 
-vis_prompt = "<p style=\"font-size:18px;\">" + \
-             "<b>Patient: </b>" + st.session_state.gender + ", " + str(st.session_state.age) + " years old.<br/>" + \
-             "<b>Pregnancy: </b>" + st.session_state.pregnant + ".<br/>" + \
-             "<b>History: </b>" + report_list[0] + ".<br/>" + \
-             "<b>Symptoms: </b>" + report_list[1] + ".<br/>" + \
-             "<b>Examination findings: </b>" + report_list[2] + ".<br/>" + \
-             "<b>Laboratory test results: </b>" + report_list[3] + ".<br/> </p>"
+vis_summary = "<p style=\"font-size:18px;\">" + \
+              "<b>Patient: </b>" + st.session_state.gender + ", " + str(st.session_state.age) + " years old.<br/>" + \
+              "<b>Pregnancy: </b>" + st.session_state.pregnant + ".<br/>" + \
+              "<b>History: </b>" + report_list[0] + ".<br/>" + \
+              "<b>Symptoms: </b>" + report_list[1] + ".<br/>" + \
+              "<b>Examination findings: </b>" + report_list[2] + ".<br/>" + \
+              "<b>Laboratory test results: </b>" + report_list[3] + ".<br/> </p>"
 
-st.write(vis_prompt, unsafe_allow_html=True) 
+st.write(vis_summary, unsafe_allow_html=True) 
 
-question_prompt = "Patient: " + st.session_state.gender + ", " + str(st.session_state.age) + " years old. " + \
-                  "Pregnancy: " + st.session_state.pregnant + ". " + \
-                  "History: " + report_list[0] + ". " + \
-                  "Symptoms: " + report_list[1] + ". " + \
-                  "Examination findings: " + report_list[2] + ". " + \
-                  "Laboratory test results: " + report_list[3] + ". " + \
-                  "What is the likely diagnosis ? " + \
-                  "Then, insert '<br/><br/>' in your response. " + \
-                  "And, propose a treatment formatted as an ordered list. " 
-                  # Last two lines aren't often understandable by models other than DaVinci-003
+prompt_words = st.secrets["prompt_canvas"]["prompt_words"]
+question_prompt = prompt_words[0] + st.session_state.gender + ", " + str(st.session_state.age) + " years old. " + \
+                  prompt_words[1] + st.session_state.pregnant + ". " + \
+                  prompt_words[2] + report_list[0] + ". " + \
+                  prompt_words[3] + report_list[1] + ". " + \
+                  prompt_words[4] + report_list[2] + ". " + \
+                  prompt_words[5] + report_list[3] + ". " + \
+                  prompt_words[6] + \
+                  prompt_words[7] + \
+                  prompt_words[8] 
 
 st.subheader(":computer: :speech_balloon: :pill: **Diagnostic**")
 if st.button('**Submit**'):

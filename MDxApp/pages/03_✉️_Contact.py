@@ -11,10 +11,28 @@ st.set_page_config(
     page_icon="✉️",
 )
 
-# Use Local logo File
-path = os.path.dirname(__file__)
-file_name = path+"/../../Materials/MDxApp_logo_v2_256.png"
-st.sidebar.image(file_name, caption= '', width=256)
+# Works with streamlit==1.17.0
+# TODO: Review class names for future versions
+st.markdown("""
+  <style>
+      ul[class="css-j7qwjs e1fqkh3o7"]{
+        position: relative;
+        padding-top: 2rem;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+      }
+      .css-17lntkn {
+        font-weight: bold;
+        font-size: 18px;
+        color: grey;
+      }
+      .css-pkbazv {
+        font-weight: bold;
+        font-size: 18px;
+      }
+  </style>""", unsafe_allow_html=True)
 
 st.header("Contact")
 
