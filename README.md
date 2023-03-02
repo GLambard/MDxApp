@@ -11,7 +11,7 @@ a list of symptoms, recent and relevant observations on the patient's state, and
 chronic condition(s) followed by indications on any existing treatment(s). 
 
 Patient's demographics, context, symptoms, observations, chronic conditions added to any relevant information 
-can all be entered in plain text in the app. The medical jargon with known abbreviations is fully surported. 
+can all be entered in plain text in the app. The medical jargon with known abbreviations is fully supported. 
 More information on a patient may help to propose a more precise medical diagnostic. 
 
 The use of the app is straightforward with examples shown to the user for guidance. 
