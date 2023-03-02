@@ -54,18 +54,25 @@ st.header("About")
 st.markdown(
     """
     ### **Brief description of the web app**
-    This app is designed to assist medical doctors in finding a 
-    right diagnostic by allowing them to enter relevant information such as age, 
-    gender, pregnancy state, environmental context, symptoms, observations, and 
-    pre-treatment information.
+    This app is designed to assist medical doctors and provide patients with a 
+    fast diagnostic supported by the ChatGPT AI model of [OpenAI](https://openai.com/) based on relevant information such as age, 
+    gender, pregnancy state, environmental and historical context, symptoms, observations, and test results conducted in laboratory.
+    ### **Why should you buy me a coffee, i.e. donate ?**
+    This app uses the ChatGPT AI model through the official API of OpenAI which has a cost. Also, this app is free to use and will 
+    remain free to use for all if you support it by buying me a coffee (see the dedicated button and QR code on the left side). 
+    Thank you very much in advance for making it possible !
     ### Versions
     :sparkles: **Current version: V1.10** (2023/02/02) :sparkles:  
     - Updates: **model gpt-3.5-turbo (ChatGPT) integration**, bug fixes, and performance improvements.
 
     Version history:
     - V1.01 (2023/01/30): Internal pre-release
+    ### **Sources**
+    - The source code of this app is available [here](https://github.com/GLambard/MDxApp)
+    - Anonymous public cases taken from the Brown Hospital Medicine Twitter account [@BrownJHM](https://twitter.com/BrownJHM) 
+    are used as illustrating examples on the main page of the app. 
     ### :rotating_light: **Caution message** :rotating_light:
-    Please be aware that while the app is designed to assist medical professionals, 
+    Please be aware that while the app is designed to assist medical decision-making and check symptoms, 
     the final diagnosis should be made by a licensed medical professional. We recommend 
     seeking additional evaluations and opinions before making any treatment decisions.
     ### **Message from the developer**
@@ -85,8 +92,15 @@ st.markdown(
     > Guillaume Lambard  
     > AI solutions designer and developer  
     > *(who developed this tool in his spare time)*
-    >  
+    > 
     >  
     """, 
     unsafe_allow_html=True
 )
+
+html(f"""
+    <a class="github-button" href="https://github.com/GLambard/MDxApp" data-show-count="true" aria-label="Follow @GLambard on GitHub">Follow @GLambard</a>
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <a class="twitter-follow-button" href="https://twitter.com/gamlambard">Follow @gamlambard</a>
+    <script async defer src="https://platform.twitter.com/widgets.js"></script>
+    """)

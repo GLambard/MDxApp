@@ -11,11 +11,6 @@ for k, v in st.session_state.items():
     st.session_state[k] = v 
 ##
 
-# Quick FIX for SSL certificate localization
-# Remove if out of DMZ
-os.environ["REQUESTS_CA_BUNDLE"] = '/usr/local/share/ca-certificates/extras/nims_proxy_copy.pem'
-os.environ["SSL_CERT_FILE"] = '/usr/local/share/ca-certificates/extras/nims_proxy_copy.pem'
-
 #OpenAI API key as an environment variable
 openai.api_key = os.getenv("OPENAI_API_KEY")
 openai.api_key = st.secrets["openai_api_key"]
@@ -24,7 +19,8 @@ def openai_create(prompt):
 
     response = openai.ChatCompletion.create(
     model=st.secrets["openai_api_model"],
-    messages=[{"role": "user", "content": prompt}],
+    messages=[{"role": "system", "content": st.secrets["prompt_canvas"]["prompt_system"]}, 
+              {"role": "user", "content": prompt}], 
     temperature=float(st.secrets["openai_api_temp"]), 
     max_tokens=int(st.secrets["openai_api_maxtok"]),
     frequency_penalty=int(st.secrets["openai_api_freqp"]),
@@ -40,6 +36,7 @@ st.set_page_config(
     layout="wide"
 )
 
+# Font size and weight for the sidebar
 # Works with streamlit==1.17.0
 # TODO: Review class names for future versions
 st.markdown("""
@@ -84,6 +81,18 @@ with t1:
     st.image(logo_name, caption= '', width=256)
 with t2:
     st.header("**Medical Diagnosis Assistant**")
+    st.write("<p style=\"font-weight: bold; font-size:18px;\">Experience the future of healthcare with our ChatGPT-powered <br>medical diagnostic and symptom checking tool.</p>", 
+                 unsafe_allow_html=True)    
+
+st.markdown("", unsafe_allow_html=True)
+"""
+---
+"""
+st.write("<p style=\"font-weight: bold; font-size:18px;\">How to use this app:</p>"+ \
+         "<p style=\"font-size:18px;\">1. Fill out the report below (some symptoms are at least required)<br/>"+ \
+         "2. Check the summary of the report<br/>"+ \
+         "3. Submit the report (None of the provided data are saved or shared)</p>", 
+         unsafe_allow_html=True)
 
 st.write(
     """<style>
@@ -112,7 +121,7 @@ div[class*="stNumberInput"] > label > div[data-testid="stMarkdownContainer"] > p
     """, unsafe_allow_html=True)
 st.markdown(
     """<style>
-div[class*="stTextArea"] > label > div[data-testid="stMarkdownContainer"] > p {
+div[class*="stTextInput"] > label > div[data-testid="stMarkdownContainer"] > p {
     font-size: 18px;
 }
     </style>
@@ -149,25 +158,25 @@ with col3:
     st.radio("**Pregnant**", pregnant_list, disabled=st.session_state.disabled, key="pregnant")
 
 # Context
-st.text_area('**History** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
-             placeholder="none", key="context", 
+st.text_input('**History** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
+             placeholder="none", key="context", max_chars=100, 
              help=":green[**Enter patient's known background information, including their past medical conditions, medications, " + \
                   "family history, lifestyle, and other relevant information that can help in diagnosis and treatment**]")
 
 # List of symptoms
-st.text_area("**Symptoms** *(Example: high-grade fever, lethargy, headache, and abdominal pain for two days)*", 
-             placeholder="none", key="symptoms", 
+st.text_input("**Symptoms** *(Example: high-grade fever, lethargy, headache, and abdominal pain for two days)*", 
+             placeholder="none", key="symptoms", max_chars=100, 
              help=":green[**List all symptoms indicating the presence of an underlying medical condition**]")
 
 # List of observations at exam
-st.text_area("**Examination findings** *(Example: petechial lesions on the palms of his hands and feet, bug bites)*", 
-             placeholder="none", key="exam", 
+st.text_input("**Examination findings** *(Example: petechial lesions on the palms of his hands and feet, bug bites)*", 
+             placeholder="none", key="exam", max_chars=100, 
              help=":green[**List all the information gathered through visual inspection, palpation, " + \
                   "percussion, and auscultation during the examination**]")
 
 # Laboratory test results
-st.text_area("**Laboratory test results** *(Example: w/IgE levels > 3000 IU/m)*", 
-             placeholder="none", key="labresults", 
+st.text_input("**Laboratory test results** *(Example: w/IgE levels > 3000 IU/m)*", 
+             placeholder="none", key="labresults", max_chars=100, 
              help=":green[**List output of tests performed on samples of bodily fluids, tissues, " + \
                   "or other substances to help diagnose, monitor, or treat medical conditions. " + \
                   "These tests can include blood tests, urine tests, imaging tests, biopsies, " + \
@@ -204,22 +213,27 @@ question_prompt = prompt_words[0] + st.session_state.gender + ", " + str(st.sess
                   prompt_words[7] + \
                   prompt_words[8] 
 
+st.write('')
+submit_button = st.button('**SUBMIT**', help=":green[**Submit the report for diagnostic**]")
+st.write('')
+
 st.subheader(":computer: :speech_balloon: :pill: **Diagnostic**")
-if st.button('**Submit**'):
+if submit_button:
     if report_list[1] == "none":
-        st.write("<p style=\"font-size:18px;\">Please, enter at least some symptoms before submission.</p>", 
+        st.write("<p style=\"font-weight: bold; font-size:18px;\">Please, enter at least some symptoms before submission.</p>", 
                  unsafe_allow_html=True)
     else:
         with st.spinner('Please wait...'):
             try:
                 st.session_state.diagnostic = openai_create(prompt=question_prompt)
+                st.write('')
                 st.write(st.session_state.diagnostic.replace("<|im_end|>", ""), unsafe_allow_html=True)
             except: 
-                st.write("<p style=\"font-size:18px;\">The server does not respond or is overloaded with requests... Try again.</p>", 
+                st.write("<p style=\"font-weight: bold; font-size:18px;\">The server does not respond or is overloaded with requests... Try again.</p>", 
                          unsafe_allow_html=True)
 else: 
     if "diagnostic" in st.session_state:
         st.write(st.session_state.diagnostic.replace("<|im_end|>", ""), unsafe_allow_html=True)
     else: 
-        st.write("<p style=\"font-weight: bold; font-size:18px;\">No diagnostic yet. Please fill out the report and click Submit above.</p>", 
+        st.write("<p style=\"font-weight: bold; font-size:18px;\">No diagnostic yet. Please fill out the report and click SUBMIT above.</p>", 
                  unsafe_allow_html=True)
