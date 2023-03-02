@@ -17,16 +17,19 @@ More information on a patient may help to propose a more precise medical diagnos
 The use of the app is straightforward with examples shown to the user for guidance. 
 
 The time response of the app may vary with the traffic of requests, the speed of your internet connection, and 
-finally the disponibility of the Open AI API. If this happens, try again later. 
+finally the disponibility of the OpenAI API. If this happens, try again later. 
 
-For nay requests, comments, questions on the app, please use the email form accessible from the contact page in the 
-app. 
+For any requests, comments, questions on the app, please use the email form accessible from the contact page in the 
+app, or post them right here in the issues. 
 
 And last, but not the least, we would appreciate that, if you find this app useful, you share it around you by any 
 channel you may prefer. 
 
-Finally, support the further developments and maintenances of this app by buying me a coffee just below. I will deeply 
-appreciate it 'cause I love coffee! 
+Finally, support the further developments and maintenances of this app by buying me a coffee. This app uses 
+the ChatGPT AI model through the official API of OpenAI which has a cost. Also, this app is free to use and will remain 
+free to use for all if you support it by buying me a coffee (see the dedicated button below). 
+
+Thank you very much in advance for making it possible !
 
 ## Support the app
 
