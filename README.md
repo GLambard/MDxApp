@@ -2,7 +2,7 @@
 
 Here, we want to make the access to a large knowledge in 
 medical diagnosis available to an as broad as possible community of 
-medical professionals.  
+medical professionals and individuals seeking access to a fast medical diagnosis tool.  
 
 For this, we have developed the **MDxApp** that's using **ChatGPT** 
 (a chatbot recently developed by Open AI) as a proxy to assist you in proposing 
