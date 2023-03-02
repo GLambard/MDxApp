@@ -228,7 +228,8 @@ if submit_button:
                 st.session_state.diagnostic = openai_create(prompt=question_prompt)
                 st.write('')
                 st.write(st.session_state.diagnostic.replace("<|im_end|>", ""), unsafe_allow_html=True)
-            except: 
+            except Exception as e: 
+                print(e) 
                 st.write("<p style=\"font-weight: bold; font-size:18px;\">The server does not respond or is overloaded with requests... Try again.</p>", 
                          unsafe_allow_html=True)
 else: 
