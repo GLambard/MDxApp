@@ -22,9 +22,9 @@ openai.api_key = st.secrets["openai_api_key"]
 
 def openai_create(prompt):
 
-    response = openai.Completion.create(
+    response = openai.ChatCompletion.create(
     model=st.secrets["openai_api_model"],
-    prompt=prompt,
+    messages=[{"role": "user", "content": prompt}],
     temperature=float(st.secrets["openai_api_temp"]), 
     max_tokens=int(st.secrets["openai_api_maxtok"]),
     frequency_penalty=int(st.secrets["openai_api_freqp"]),
@@ -32,7 +32,7 @@ def openai_create(prompt):
     stop = None
     )
 
-    return response.choices[0].text
+    return response['choices'][0]['message']['content']
 
 st.set_page_config(
     page_title="Diagnosis_Assistant",
@@ -221,5 +221,5 @@ else:
     if "diagnostic" in st.session_state:
         st.write(st.session_state.diagnostic.replace("<|im_end|>", ""), unsafe_allow_html=True)
     else: 
-        st.write("<p style=\"font-size:18px;\">No diagnostic yet, please click **Submit** above.</p>", 
+        st.write("<p style=\"font-weight: bold; font-size:18px;\">No diagnostic yet. Please fill out the report and click Submit above.</p>", 
                  unsafe_allow_html=True)

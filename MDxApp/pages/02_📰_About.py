@@ -59,7 +59,11 @@ st.markdown(
     gender, pregnancy state, environmental context, symptoms, observations, and 
     pre-treatment information.
     ### Versions
-    :sparkles: Current version: V1.01 (2023/01/30) :sparkles:
+    :sparkles: **Current version: V1.10** (2023/02/02) :sparkles:  
+    - Updates: **model gpt-3.5-turbo (ChatGPT) integration**, bug fixes, and performance improvements.
+
+    Version history:
+    - V1.01 (2023/01/30): Internal pre-release
     ### :rotating_light: **Caution message** :rotating_light:
     Please be aware that while the app is designed to assist medical professionals, 
     the final diagnosis should be made by a licensed medical professional. We recommend 
