@@ -1,3 +1,5 @@
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://medicaldiagnosticassistant.streamlit.app)
+
 # :tv: Welcome to the MDxApp page :hospital:
 
 Here, we want to make the access to a large knowledge in 
