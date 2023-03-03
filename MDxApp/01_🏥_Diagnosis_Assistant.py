@@ -158,25 +158,25 @@ with col3:
     st.radio("**Pregnant**", pregnant_list, disabled=st.session_state.disabled, key="pregnant")
 
 # Context
-st.text_input('**History** *(Example: gone to an outdoor music festival, shared drinks and cigarettes with friends with similar symptoms)*', 
-             placeholder="none", key="context", max_chars=100, 
+st.text_input('**History** *(Example: gone to an outdoor music festival in north america, shared drinks and cigarettes with friends with similar symptoms)*', 
+             placeholder="none", key="context", max_chars=250, 
              help=":green[**Enter patient's known background information, including their past medical conditions, medications, " + \
                   "family history, lifestyle, and other relevant information that can help in diagnosis and treatment**]")
 
 # List of symptoms
 st.text_input("**Symptoms** *(Example: high-grade fever, lethargy, headache, and abdominal pain for two days)*", 
-             placeholder="none", key="symptoms", max_chars=100, 
+             placeholder="none", key="symptoms", max_chars=250, 
              help=":green[**List all symptoms indicating the presence of an underlying medical condition**]")
 
 # List of observations at exam
 st.text_input("**Examination findings** *(Example: petechial lesions on the palms of his hands and feet, bug bites)*", 
-             placeholder="none", key="exam", max_chars=100, 
+             placeholder="none", key="exam", max_chars=250, 
              help=":green[**List all the information gathered through visual inspection, palpation, " + \
                   "percussion, and auscultation during the examination**]")
 
 # Laboratory test results
 st.text_input("**Laboratory test results** *(Example: w/IgE levels > 3000 IU/m)*", 
-             placeholder="none", key="labresults", max_chars=100, 
+             placeholder="none", key="labresults", max_chars=250, 
              help=":green[**List output of tests performed on samples of bodily fluids, tissues, " + \
                   "or other substances to help diagnose, monitor, or treat medical conditions. " + \
                   "These tests can include blood tests, urine tests, imaging tests, biopsies, " + \
