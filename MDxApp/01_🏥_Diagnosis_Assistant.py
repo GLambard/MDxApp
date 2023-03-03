@@ -229,7 +229,7 @@ if submit_button:
                 st.write('')
                 st.write(st.session_state.diagnostic.replace("<|im_end|>", ""), unsafe_allow_html=True)
             except Exception as e: 
-                #st.write(e) 
+                st.write(e) 
                 st.write("<p style=\"font-weight: bold; font-size:18px;\">The server does not respond or is overloaded with requests... Try again.</p>", 
                          unsafe_allow_html=True)
 else: 
