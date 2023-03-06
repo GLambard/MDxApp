@@ -61,12 +61,16 @@ st.markdown(
     This app uses the ChatGPT AI model through the official API of OpenAI which has a cost. Also, this app is free to use and will 
     remain free to use for all if you support it by buying me a coffee (see the dedicated button and QR code on the left side). 
     Thank you very much in advance for making it possible !
+    ### Coming features
+    - Differential diagnosis :clipboard:
+    - Multilingual interface 🇬🇧 🇨🇳 🇪🇸 🇧🇷 🇮🇩 🇯🇵 🇷🇺 🇫🇷 🇩🇪
     ### Versions
-    :sparkles: **Current version: V1.10** (2023/02/02) :sparkles:  
-    - Updates: **model gpt-3.5-turbo (ChatGPT) integration**, bug fixes, and performance improvements.
+    :sparkles: **Current version: V1.11** (2023/03/07) :sparkles:  
+    - Updates: **Highlight** in HTML format the **proposed diagnostic**, *caution message* added, bug fixes.
 
     Version history:
-    - V1.01 (2023/01/30): Internal pre-release
+    - v1.10 (2023/03/02): Updates: **model gpt-3.5-turbo (ChatGPT) integration**, bug fixes, and performance improvements.
+    - v1.01 (2023/01/30): Internal pre-release
     ### **Sources**
     - The source code of this app is available [here](https://github.com/GLambard/MDxApp)
     - Anonymous public cases taken from the Brown Hospital Medicine Twitter account [@BrownJHM](https://twitter.com/BrownJHM) 

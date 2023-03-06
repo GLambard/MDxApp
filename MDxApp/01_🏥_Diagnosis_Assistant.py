@@ -228,6 +228,15 @@ if submit_button:
                 st.session_state.diagnostic = openai_create(prompt=question_prompt)
                 st.write('')
                 st.write(st.session_state.diagnostic.replace("<|im_end|>", ""), unsafe_allow_html=True)
+                st.markdown(
+                            """
+                            ### :rotating_light: **Caution message** :rotating_light:
+                            Please be aware that while the app is designed to assist medical decision-making and check symptoms, 
+                            the final diagnosis should be made by a licensed medical professional. We recommend 
+                            seeking additional evaluations and opinions before making any treatment decisions.  
+                            """, 
+                            unsafe_allow_html=True
+                           )
             except Exception as e: 
                 #st.write(e) 
                 st.write("<p style=\"font-weight: bold; font-size:18px;\">The server does not respond or is overloaded with requests... Try again.</p>", 
