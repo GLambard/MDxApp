@@ -66,7 +66,7 @@ st.markdown(
     - Multilingual interface 🇬🇧 🇨🇳 🇪🇸 🇧🇷 🇮🇩 🇯🇵 🇷🇺 🇫🇷 🇩🇪
     ### Versions
     :sparkles: **Current version: V1.11** (2023/03/07) :sparkles:  
-    - Updates: **Highlight** in HTML format the **proposed diagnostic**, *caution message* added, bug fixes.
+    - Updates: **Highlight** in HTML format the **proposed diagnostic**, **caution message** added, bug fixes.
 
     Version history:
     - v1.10 (2023/03/02): Updates: **model gpt-3.5-turbo (ChatGPT) integration**, bug fixes, and performance improvements.
