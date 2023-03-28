@@ -3,16 +3,22 @@ from streamlit.components.v1 import html
 from streamlit_extras.buy_me_a_coffee import button
 
 import os
+import json
 
 import openai
+
+path = os.path.dirname(__file__)
+
+# Load translations from JSON file
+with open(path+"/../Assets/translations.json") as f:
+    transl = json.load(f)
 
 # Trick to preserve the state of your widgets across pages
 for k, v in st.session_state.items():
     st.session_state[k] = v 
 ##
 
-#OpenAI API key as an environment variable
-openai.api_key = os.getenv("OPENAI_API_KEY")
+#OpenAI API key
 openai.api_key = st.secrets["openai_api_key"]
 
 def openai_create(prompt):
@@ -35,6 +41,26 @@ st.set_page_config(
     page_icon="🏥",
     layout="wide"
 )
+
+# Add the language selection dropdown    
+if 'lang_tmp' not in st.session_state:
+    st.session_state['lang_tmp'] = 'English'
+
+if 'lang_changed' not in st.session_state:
+    st.session_state['lang_changed'] = False
+
+if 'lang_select' in st.session_state:
+    lang = st.sidebar.selectbox(transl[st.session_state['lang_select']]["language_selection"],
+                                options=list(transl.keys()), key='lang_select')
+else:
+    lang = st.sidebar.selectbox(transl[st.session_state['lang_tmp']]["language_selection"],
+                                options=list(transl.keys()), key='lang_select')
+
+if lang != st.session_state['lang_tmp']:
+    st.session_state['lang_tmp'] = lang
+    st.session_state['lang_changed'] = True
+else:
+    st.session_state['lang_changed'] = False
 
 # Font size and weight for the sidebar
 # Works with streamlit==1.17.0
@@ -60,15 +86,13 @@ st.markdown("""
       }
   </style>""", unsafe_allow_html=True)
 
-path = os.path.dirname(__file__)
-
 # Buy me a coffee - MDxApp support
 button = f"""<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="geonosislaX" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>"""
 with st.sidebar:
-    st.markdown("<h3 style='text-align: center; color: black;'>Let's keep MDxApp free!</h3>", unsafe_allow_html=True)
-    st.markdown("<h4 style='text-align: left; color: black;'>By clicking here:</h4>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center; color: black;'>{}</h3>".format(transl[lang]['bmc_0']), unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align: left; color: black;'>{}</h4>".format(transl[lang]['bmc_1']), unsafe_allow_html=True)
     html(button, height=70, width=220)
-    st.markdown("<h4 style='text-align: left; color: black;'>Or use this QR code:</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align: left; color: black;'>{}</h4>".format(transl[lang]['bmc_2']), unsafe_allow_html=True)
     qr_name = path+"/../Materials/bmc_qr.png"
     st.image(qr_name, caption= '', width = 220)
 
@@ -80,18 +104,18 @@ t1, t2 = st.columns([1,3], gap="large")
 with t1: 
     st.image(logo_name, caption= '', width=256)
 with t2:
-    st.header("**Medical Diagnosis Assistant**")
-    st.write("<p style=\"font-weight: bold; font-size:18px;\">Experience the future of healthcare with our ChatGPT-powered <br>medical diagnostic and symptom checking tool.</p>", 
+    st.header("**{}**".format(transl[lang]['page1_header']))
+    st.write("<p style=\"font-weight: bold; font-size:18px;\">{}</p>".format(transl[lang]['page1_subheader']), 
                  unsafe_allow_html=True)    
 
 st.markdown("", unsafe_allow_html=True)
 """
 ---
 """
-st.write("<p style=\"font-weight: bold; font-size:18px;\">How to use this app:</p>"+ \
-         "<p style=\"font-size:18px;\">1. Fill out the report below (some symptoms are at least required)<br/>"+ \
-         "2. Check the summary of the report<br/>"+ \
-         "3. Submit the report (None of the provided data are saved or shared)</p>", 
+st.write("<p style=\"font-weight: bold; font-size:18px;\">{}</p>".format(transl[lang]['htu_0'])+ \
+         "<p style=\"font-size:18px;\">1. {}<br/>".format(transl[lang]['htu_1'])+ \
+         "2. {}<br/>".format(transl[lang]['htu_2'])+ \
+         "3. {}</p>".format(transl[lang]['htu_3']), 
          unsafe_allow_html=True)
 
 st.write(
@@ -128,7 +152,7 @@ div[class*="stTextInput"] > label > div[data-testid="stMarkdownContainer"] > p {
     """, unsafe_allow_html=True)
 ####
 
-st.subheader(":black_nib: **Report**")
+st.subheader(":black_nib: **{}**".format(transl[lang]['report_header']))
 # Define columns
 col1, col2, col3 = st.columns(3, gap="large")
 
@@ -136,74 +160,82 @@ col1, col2, col3 = st.columns(3, gap="large")
 if "disabled" not in st.session_state:
     st.session_state.disabled = False
 # Declare lists
-genders_list = ["Male", "Female"]
-pregnant_list = ["No", "Yes"]
+genders_list = ["{}".format(transl[lang]['male']), "{}".format(transl[lang]['female'])]
+pregnant_list = ["{}".format(transl[lang]['no']), "{}".format(transl[lang]['yes'])]
 ##
 
 # Gender selector 
-with col1:
-    st.radio("**Gender**", genders_list, key='gender')
+with col1:   
+    if st.session_state['lang_changed'] and 'gender' in st.session_state:     
+        del st.session_state['gender']
+    if 'gender' not in st.session_state:
+        st.session_state['gender'] = genders_list[0]
+    st.radio("**{}**".format(transl[lang]['gender']), genders_list, key='gender')
 # Age selector 
 with col2:
-    st.number_input("**Age**", min_value= 0, max_value= 99, step=1, key="age")
+    st.number_input("**{}**".format(transl[lang]['age']), min_value= 0, max_value= 99, step=1, key="age")
 # Pregnancy
-if st.session_state.gender == 'Male':
+if st.session_state.gender == '{}'.format(transl[lang]['male']):
     st.session_state.disabled = True
-    if "pregnant" in st.session_state:
-        st.session_state.pregnant = "No"
+    if 'pregnant' in st.session_state:
+        st.session_state['pregnant'] = "{}".format(transl[lang]['no'])
 else: 
     st.session_state.disabled = False
 
 with col3: 
-    st.radio("**Pregnant**", pregnant_list, disabled=st.session_state.disabled, key="pregnant")
+    if st.session_state['lang_changed'] and 'pregnant' in st.session_state:
+        del st.session_state['pregnant']
+    if 'pregnant' not in st.session_state:
+        st.session_state['pregnant'] = pregnant_list[0]
+    st.radio("**{}**".format(transl[lang]['pregnant']), pregnant_list, disabled=st.session_state.disabled, key='pregnant')
 
 # Context
-st.text_input('**History** *(Example: gone to an outdoor music festival in north america, shared drinks and cigarettes with friends with similar symptoms)*', 
-             placeholder="none", key="context", max_chars=250, 
-             help=":green[**Enter patient's known background information, including their past medical conditions, medications, " + \
-                  "family history, lifestyle, and other relevant information that can help in diagnosis and treatment**]")
+st.text_input('**{}** *{}*'.format(transl[lang]['history'], transl[lang]['hist_example']), 
+             placeholder="{}".format(transl[lang]['hist_ph']), key="context", max_chars=250, 
+             help=":green[**{}**]".format(transl[lang]['hist_help']))
 
 # List of symptoms
-st.text_input("**Symptoms** *(Example: high-grade fever, lethargy, headache, and abdominal pain for two days)*", 
-             placeholder="none", key="symptoms", max_chars=250, 
-             help=":green[**List all symptoms indicating the presence of an underlying medical condition**]")
+st.text_input("**{}** *{}*".format(transl[lang]['symptoms'], transl[lang]['symp_example']), 
+             placeholder="{}".format(transl[lang]['symp_ph']), key="symptoms", max_chars=250, 
+             help=":green[**{}**]".format(transl[lang]['symp_help']))
 
 # List of observations at exam
-st.text_input("**Examination findings** *(Example: petechial lesions on the palms of his hands and feet, bug bites)*", 
-             placeholder="none", key="exam", max_chars=250, 
-             help=":green[**List all the information gathered through visual inspection, palpation, " + \
-                  "percussion, and auscultation during the examination**]")
+st.text_input("**{}** *{}*".format(transl[lang]['exam'], transl[lang]['exam_example']), 
+             placeholder="{}".format(transl[lang]['exam_ph']), key="exam", max_chars=250, 
+             help=":green[**{}**]".format(transl[lang]['exam_help']))
 
 # Laboratory test results
-st.text_input("**Laboratory test results** *(Example: w/IgE levels > 3000 IU/m)*", 
-             placeholder="none", key="labresults", max_chars=250, 
-             help=":green[**List output of tests performed on samples of bodily fluids, tissues, " + \
-                  "or other substances to help diagnose, monitor, or treat medical conditions. " + \
-                  "These tests can include blood tests, urine tests, imaging tests, biopsies, " + \
-                  "and other diagnostic procedures**]")
+st.text_input("**{}** *{}*".format(transl[lang]['lab'], transl[lang]['lab_example']), 
+             placeholder="{}".format(transl[lang]['lab_ph']), key="labresults", max_chars=250, 
+             help=":green[**{}**]".format(transl[lang]['lab_help']))
 
-st.subheader(":clipboard: **Summary**")
+st.subheader(":clipboard: **{}**".format(transl[lang]['summary']))
 # Diagnostic
 
 report_list = [st.session_state.context, st.session_state.symptoms, 
                st.session_state.exam, st.session_state.labresults]
-corr_list = ["none", "none", "none", "none"]
+corr_list = ["{}".format(transl[lang]['none']), 
+             "{}".format(transl[lang]['none']), 
+             "{}".format(transl[lang]['none']), 
+             "{}".format(transl[lang]['none'])]
 for ic in range(0,len(report_list)):
     if report_list[ic] == "":
         report_list[ic] = corr_list[ic]
 
 vis_summary = "<p style=\"font-size:18px;\">" + \
-              "<b>Patient: </b>" + st.session_state.gender + ", " + str(st.session_state.age) + " years old.<br/>" + \
-              "<b>Pregnancy: </b>" + st.session_state.pregnant + ".<br/>" + \
-              "<b>History: </b>" + report_list[0] + ".<br/>" + \
-              "<b>Symptoms: </b>" + report_list[1] + ".<br/>" + \
-              "<b>Examination findings: </b>" + report_list[2] + ".<br/>" + \
-              "<b>Laboratory test results: </b>" + report_list[3] + ".<br/> </p>"
+              "<b>{}</b>".format(transl[lang]['vissum_patient']) + \
+              st.session_state.gender + ", " + str(st.session_state.age) + "{}<br/>".format(transl[lang]['vissum_yrsold']) + \
+              "<b>{}</b>".format(transl[lang]['vissum_pregnancy']) + st.session_state.pregnant + "<br/>" + \
+              "<b>{}</b>".format(transl[lang]['vissum_history']) + report_list[0] + "<br/>" + \
+              "<b>{}</b>".format(transl[lang]['vissum_symp']) + report_list[1] + "<br/>" + \
+              "<b>{}</b>".format(transl[lang]['vissum_exam']) + report_list[2] + "<br/>" + \
+              "<b>{}</b>".format(transl[lang]['vissum_lab']) + report_list[3] + "<br/> </p>"
 
 st.write(vis_summary, unsafe_allow_html=True) 
 
 prompt_words = st.secrets["prompt_canvas"]["prompt_words"]
-question_prompt = prompt_words[0] + st.session_state.gender + ", " + str(st.session_state.age) + " years old. " + \
+question_prompt = prompt_words[0] + st.session_state.gender + ", " + \
+                  str(st.session_state.age) + "{}. ".format(transl[lang]['vissum_yrsold']) + \
                   prompt_words[1] + st.session_state.pregnant + ". " + \
                   prompt_words[2] + report_list[0] + ". " + \
                   prompt_words[3] + report_list[1] + ". " + \
@@ -211,39 +243,38 @@ question_prompt = prompt_words[0] + st.session_state.gender + ", " + str(st.sess
                   prompt_words[5] + report_list[3] + ". " + \
                   prompt_words[6] + \
                   prompt_words[7] + \
-                  prompt_words[8] 
+                  prompt_words[8] + \
+                  prompt_words[9] + lang + ". "
 
 st.write('')
-submit_button = st.button('**SUBMIT**', help=":green[**Submit the report for diagnostic**]")
+submit_button = st.button('**{}**'.format(transl[lang]['submit']), help=":green[**{}**]".format(transl[lang]['submit_help']))
 st.write('')
 
-st.subheader(":computer: :speech_balloon: :pill: **Diagnostic**")
+st.subheader(":computer: :speech_balloon: :pill: **{}**".format(transl[lang]['diagnostic']))
 if submit_button:
-    if report_list[1] == "none":
-        st.write("<p style=\"font-weight: bold; font-size:18px;\">Please, enter at least some symptoms before submission.</p>", 
+    if report_list[1] == "{}".format(transl[lang]['none']):
+        st.write("<p style=\"font-weight: bold; font-size:18px;\">{}</p>".format(transl[lang]['submit_warning']), 
                  unsafe_allow_html=True)
     else:
-        with st.spinner('Please wait...'):
+        with st.spinner('{}'.format(transl[lang]['submit_wait'])):
             try:
                 st.session_state.diagnostic = openai_create(prompt=question_prompt)
                 st.write('')
                 st.write(st.session_state.diagnostic.replace("<|im_end|>", ""), unsafe_allow_html=True)
                 st.markdown(
                             """
-                            ### :rotating_light: **Caution message** :rotating_light:
-                            Please be aware that while the app is designed to assist medical decision-making and check symptoms, 
-                            the final diagnosis should be made by a licensed medical professional. We recommend 
-                            seeking additional evaluations and opinions before making any treatment decisions.  
-                            """, 
+                            ### :rotating_light: **{}** :rotating_light:
+                            {}
+                            """.format(transl[lang]['caution'], transl[lang]['caution_message']), 
                             unsafe_allow_html=True
                            )
             except Exception as e: 
                 #st.write(e) 
-                st.write("<p style=\"font-weight: bold; font-size:18px;\">The server does not respond or is overloaded with requests... Try again.</p>", 
+                st.write("<p style=\"font-weight: bold; font-size:18px;\">{}</p>".format(transl[lang]['no_response']), 
                          unsafe_allow_html=True)
 else: 
     if "diagnostic" in st.session_state:
         st.write(st.session_state.diagnostic.replace("<|im_end|>", ""), unsafe_allow_html=True)
     else: 
-        st.write("<p style=\"font-weight: bold; font-size:18px;\">No diagnostic yet. Please fill out the report and click SUBMIT above.</p>", 
+        st.write("<p style=\"font-weight: bold; font-size:18px;\">{}</p>".format(transl[lang]['no_diagnostic']), 
                  unsafe_allow_html=True)
