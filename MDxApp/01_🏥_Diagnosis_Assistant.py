@@ -42,6 +42,14 @@ st.set_page_config(
     layout="wide"
 )
 
+st.markdown("""
+  <style>
+      .css-zck4sz p {
+        font-weight: bold;
+        font-size: 18px;
+      }
+  </style>""", unsafe_allow_html=True)
+
 # Add the language selection dropdown    
 if 'lang_tmp' not in st.session_state:
     st.session_state['lang_tmp'] = 'English'
@@ -50,17 +58,20 @@ if 'lang_changed' not in st.session_state:
     st.session_state['lang_changed'] = False
 
 if 'lang_select' in st.session_state:
-    lang = st.sidebar.selectbox(transl[st.session_state['lang_select']]["language_selection"],
-                                options=list(transl.keys()), key='lang_select')
+    #st.sidebar.markdown("<h3 style='text-align: center; color: black;'>{}</h3>".format(transl[st.session_state['lang_select']]["language_selection"]), unsafe_allow_html=True)
+    lang = st.sidebar.selectbox(transl[st.session_state['lang_select']]["language_selection"], options=list(transl.keys()), key='lang_select')
 else:
-    lang = st.sidebar.selectbox(transl[st.session_state['lang_tmp']]["language_selection"],
-                                options=list(transl.keys()), key='lang_select')
+    #st.sidebar.markdown("<h3 style='text-align: center; color: black;'>{}</h3>".format(transl[st.session_state['lang_tmp']]["language_selection"]), unsafe_allow_html=True)
+    lang = st.sidebar.selectbox(transl[st.session_state['lang_tmp']]["language_selection"], options=list(transl.keys()), key='lang_select')
 
 if lang != st.session_state['lang_tmp']:
     st.session_state['lang_tmp'] = lang
     st.session_state['lang_changed'] = True
 else:
     st.session_state['lang_changed'] = False
+
+# Line separator for clarity
+st.sidebar.markdown("""---""")
 
 # Font size and weight for the sidebar
 # Works with streamlit==1.17.0
@@ -87,7 +98,7 @@ st.markdown("""
   </style>""", unsafe_allow_html=True)
 
 # Buy me a coffee - MDxApp support
-button = f"""<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="geonosislaX" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>"""
+button = f"""<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="geonosislaX" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Donate now" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>"""
 with st.sidebar:
     st.markdown("<h3 style='text-align: center; color: black;'>{}</h3>".format(transl[lang]['bmc_0']), unsafe_allow_html=True)
     st.markdown("<h4 style='text-align: left; color: black;'>{}</h4>".format(transl[lang]['bmc_1']), unsafe_allow_html=True)
@@ -268,6 +279,15 @@ if submit_button:
                             """.format(transl[lang]['caution'], transl[lang]['caution_message']), 
                             unsafe_allow_html=True
                            )
+                
+                # Buy me a coffee - MDxApp support
+                st.markdown("""---""")
+                st.markdown("<h4 style='text-align: left; color: black;'>{}</h4>".format(transl[lang]['invest']), unsafe_allow_html=True)
+                st.markdown("<h5 style='text-align: left; color: black;'>{}</h5>".format(transl[lang]['bmc_1']), unsafe_allow_html=True)
+                html(button, height=70, width=220)
+                st.markdown("<h5 style='text-align: left; color: black;'>{}</h5>".format(transl[lang]['bmc_2']), unsafe_allow_html=True)
+                qr_name = path+"/../Materials/bmc_qr.png"
+                st.image(qr_name, caption= '', width = 220)
             except Exception as e: 
                 #st.write(e) 
                 st.write("<p style=\"font-weight: bold; font-size:18px;\">{}</p>".format(transl[lang]['no_response']), 
