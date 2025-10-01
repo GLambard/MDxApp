@@ -47,7 +47,7 @@ class DiagnosisAIClient:
 
         self.logger.info(f"Initialized DiagnosisAIClient with model: {model}")
 
-    def get_diagnosis(self, system_prompt: str, user_prompt: str, **kwargs) -> Optional[str]:
+    def get_diagnosis(self, system_prompt: str, user_prompt: str, **kwargs: Any) -> Optional[str]:
         """
         Get medical diagnosis from OpenAI API.
 
@@ -112,7 +112,7 @@ class DiagnosisAIClient:
             return None
 
     def get_diagnosis_metadata(
-        self, system_prompt: str, user_prompt: str, **kwargs
+        self, system_prompt: str, user_prompt: str, **kwargs: Any
     ) -> Optional[Dict[str, Any]]:
         """
         Get diagnosis with metadata (usage, model info, etc.).
@@ -148,14 +148,18 @@ class DiagnosisAIClient:
             if diagnosis:
                 diagnosis = diagnosis.replace("<|im_end|>", "").strip()
 
-            return {
-                "diagnosis": diagnosis,
-                "model": response.model,
-                "usage": {
+            usage_data = {}
+            if response.usage:
+                usage_data = {
                     "prompt_tokens": response.usage.prompt_tokens,
                     "completion_tokens": response.usage.completion_tokens,
                     "total_tokens": response.usage.total_tokens,
-                },
+                }
+
+            return {
+                "diagnosis": diagnosis,
+                "model": response.model,
+                "usage": usage_data,
                 "finish_reason": response.choices[0].finish_reason,
             }
 
@@ -188,10 +192,11 @@ class LegacyAIClient:
         self.presence_penalty = presence_penalty
         self.logger = get_logger(__name__)
 
-    def get_diagnosis(self, system_prompt: str, user_prompt: str, **kwargs) -> Optional[str]:
+    def get_diagnosis(self, system_prompt: str, user_prompt: str, **kwargs: Any) -> Optional[str]:
         """Get diagnosis using legacy OpenAI SDK."""
         try:
-            response = openai.ChatCompletion.create(
+            # Note: Using type ignore for legacy SDK compatibility
+            response = openai.ChatCompletion.create(  # type: ignore[attr-defined]
                 model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -203,7 +208,8 @@ class LegacyAIClient:
                 presence_penalty=self.presence_penalty,
                 stop=None,
             )
-            return response["choices"][0]["message"]["content"]
+            content = response["choices"][0]["message"]["content"]
+            return str(content) if content else None
         except Exception as e:
             self.logger.error(f"Legacy OpenAI API error: {e}")
             return None

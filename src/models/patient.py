@@ -4,7 +4,7 @@ Ensures data integrity and type safety for patient information.
 """
 
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -53,7 +53,7 @@ class PatientData(BaseModel):
 
     @field_validator("is_pregnant")
     @classmethod
-    def validate_pregnancy(cls, v: str, info) -> str:
+    def validate_pregnancy(cls, v: str, info: Any) -> str:
         """
         Validate that pregnancy status is only 'yes' for female patients.
 

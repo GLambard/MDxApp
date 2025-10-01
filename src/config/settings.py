@@ -15,7 +15,7 @@ class Settings:
     Provides centralized access to all configuration values.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize settings from Streamlit secrets."""
         # OpenAI Configuration
         self.openai_api_key: str = st.secrets.get("openai_api_key", "")
@@ -69,7 +69,8 @@ class Settings:
     @property
     def is_development(self) -> bool:
         """Check if running in development mode."""
-        return st.secrets.get("environment", "production") == "development"
+        env = st.secrets.get("environment", "production")
+        return str(env) == "development"
 
 
 @lru_cache

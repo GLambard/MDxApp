@@ -77,7 +77,8 @@ def get_current_language() -> str:
     Returns:
         str: Current language name
     """
-    return st.session_state.get("lang_select", "English")
+    lang = st.session_state.get("lang_select", "English")
+    return str(lang)
 
 
 def language_changed() -> bool:
@@ -87,7 +88,8 @@ def language_changed() -> bool:
     Returns:
         bool: True if language was just changed
     """
-    return st.session_state.get("lang_changed", False)
+    changed = st.session_state.get("lang_changed", False)
+    return bool(changed)
 
 
 def clear_language_dependent_state() -> None:

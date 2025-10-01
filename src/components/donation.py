@@ -56,7 +56,7 @@ def render_donation_qr(qr_image_path: Path, caption: str = "", width: int = 220)
 
 def render_sidebar_donation(
     username: str = "geonosislaX",
-    translations: dict = None,
+    translations: Optional[dict] = None,
     language: str = "English",
     qr_image_path: Optional[Path] = None,
 ) -> None:
@@ -110,7 +110,7 @@ def render_sidebar_donation(
 
 def render_inline_donation(
     username: str = "geonosislaX",
-    translations: dict = None,
+    translations: Optional[dict] = None,
     language: str = "English",
     qr_image_path: Optional[Path] = None,
     show_separator: bool = True,

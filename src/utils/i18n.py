@@ -65,7 +65,7 @@ class I18n:
         # Try to get translation for requested language
         if language in self.translations:
             if key in self.translations[language]:
-                return self.translations[language][key]
+                return str(self.translations[language][key])
 
         # Fallback to default language
         if self.default_language in self.translations:
@@ -74,7 +74,7 @@ class I18n:
                     f"Translation '{key}' not found for '{language}', "
                     f"using {self.default_language}"
                 )
-                return self.translations[self.default_language][key]
+                return str(self.translations[self.default_language][key])
 
         # Return default or key itself
         if default is not None:
@@ -152,4 +152,5 @@ def load_translations(translations_path: Path) -> Dict[str, Dict[str, Any]]:
         dict: Translation dictionary
     """
     with open(translations_path, encoding="utf-8") as f:
-        return json.load(f)
+        data: Dict[str, Dict[str, Any]] = json.load(f)
+        return data
