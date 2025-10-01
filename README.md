@@ -6,11 +6,13 @@ Here, we want to make the access to a large knowledge in
 medical diagnosis available to an as broad as possible community of 
 medical professionals and individuals seeking access to a fast medical diagnosis tool.  
 
-For this, we have developed the **MDxApp** that's using **ChatGPT** 
-(a chatbot recently developed by Open AI) as a proxy to assist you in proposing 
+For this, we have developed the **MDxApp** that's using **GPT-5 Mini** 
+(OpenAI's latest AI model with 400K context window and multimodal capabilities) to assist you in proposing 
 a quick diagnostic according to a patient's demographics, a recent environmental context, 
 a list of symptoms, recent and relevant observations on the patient's state, and any existing 
-chronic condition(s) followed by indications on any existing treatment(s). 
+chronic condition(s) followed by indications on any existing treatment(s).
+
+**New in v2.0:** Powered by GPT-5 Mini with structured outputs, enhanced prompting strategies, and improved diagnostic accuracy. 
 
 Patient's demographics, context, symptoms, observations, chronic conditions added to any relevant information 
 can all be entered in plain text in the app. The medical jargon with known abbreviations is fully supported. 

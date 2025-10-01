@@ -284,3 +284,6 @@ tests/
 .coverage
 htmlcov/
 .pytest_cache/
+
+# secrets
+.streamlit/

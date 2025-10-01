@@ -1,7 +1,8 @@
-import streamlit as st
 import os
 import sys
 from pathlib import Path
+
+import streamlit as st
 
 # Add src directory to path for imports
 path_dir = os.path.dirname(__file__)
@@ -33,15 +34,19 @@ contact_form = """
      <textarea name="message" placeholder="Your message here"></textarea>
      <button type="submit">Send</button>
 </form>
-""".format(st.secrets["email_address"])
+""".format(
+    st.secrets["email_address"]
+)
 
 st.markdown(contact_form, unsafe_allow_html=True)
+
 
 # Use Local CSS File
 def local_css(file_name):
     path = os.path.dirname(__file__)
-    file_name = path+"/"+file_name
+    file_name = path + "/" + file_name
     with open(file_name) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 
 local_css("styles/email_form.css")
