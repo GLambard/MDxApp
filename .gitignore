@@ -276,3 +276,11 @@ docs/.doctrees/
 
 # notes
 notes/
+
+# test files
+tests/
+
+# test coverage
+.coverage
+htmlcov/
+.pytest_cache/

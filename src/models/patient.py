@@ -5,7 +5,7 @@ Ensures data integrity and type safety for patient information.
 
 from typing import Optional
 from enum import Enum
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 class Gender(str, Enum):
@@ -118,12 +118,12 @@ class PatientData(BaseModel):
         """
         return bool(self.symptoms and len(self.symptoms.strip()) > 0)
     
-    class Config:
-        """Pydantic model configuration."""
+    model_config = ConfigDict(
         # Allow arbitrary types for future extensions
-        arbitrary_types_allowed = True
+        arbitrary_types_allowed=True,
         # Use enum values instead of enum objects
-        use_enum_values = True
+        use_enum_values=True
+    )
 
 
 class DiagnosisRequest(BaseModel):
@@ -140,9 +140,7 @@ class DiagnosisRequest(BaseModel):
     system_prompt: str
     language: str = "English"
     
-    class Config:
-        """Pydantic model configuration."""
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class DiagnosisResponse(BaseModel):
@@ -161,7 +159,5 @@ class DiagnosisResponse(BaseModel):
     success: bool = True
     error_message: Optional[str] = None
     
-    class Config:
-        """Pydantic model configuration."""
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
