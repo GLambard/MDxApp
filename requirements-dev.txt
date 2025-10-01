@@ -1,0 +1,32 @@
+# Development dependencies for MDxApp
+# Install with: pip install -r requirements-dev.txt
+
+# Testing
+pytest>=8.0.0
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+pytest-asyncio>=0.23.0
+
+# Code Quality
+black>=24.0.0          # Code formatting
+ruff>=0.5.0           # Fast Python linter
+mypy>=1.10.0          # Static type checking
+isort>=5.13.0         # Import sorting
+
+# Pre-commit hooks
+pre-commit>=3.7.0
+
+# Documentation
+sphinx>=7.0.0
+sphinx-rtd-theme>=2.0.0
+
+# Development tools
+ipython>=8.12.0       # Enhanced Python shell
+ipdb>=0.13.13         # IPython debugger
+
+# Type stubs for better type checking
+types-requests>=2.31.0
+
+# Load testing (optional)
+locust>=2.20.0
+
