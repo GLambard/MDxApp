@@ -1,0 +1,114 @@
+/**
+ * MDxApp Main Stylesheet
+ * Extracted from inline styles for better maintainability
+ * Uses data attributes instead of brittle CSS class names where possible
+ */
+
+/* ============================================
+   General Text Styling
+   ============================================ */
+
+/* Bold paragraph text with larger font */
+.css-zck4sz p {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* ============================================
+   Sidebar Styling
+   ============================================ */
+
+/* Sidebar navigation list - centered layout */
+ul[class="css-j7qwjs e1fqkh3o7"] {
+    position: relative;
+    padding-top: 2rem;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Sidebar inactive/non-selected items */
+.css-17lntkn {
+    font-weight: bold;
+    font-size: 18px;
+    color: grey;
+}
+
+/* Sidebar active/selected items */
+.css-pkbazv {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* ============================================
+   Layout and Alignment
+   ============================================ */
+
+/* Horizontal block alignment - using data attribute */
+[data-testid="stHorizontalBlock"] {
+    align-items: center;
+}
+
+/* ============================================
+   Form Input Styling
+   ============================================ */
+
+/* Radio button labels - using data attribute for markdown container */
+div[class*="stRadio"] > label > div[data-testid="stMarkdownContainer"] > p {
+    font-size: 18px;
+}
+
+/* Number input labels - using data attribute for markdown container */
+div[class*="stNumberInput"] > label > div[data-testid="stMarkdownContainer"] > p {
+    font-size: 18px;
+}
+
+/* Text input labels - using data attribute for markdown container */
+div[class*="stTextInput"] > label > div[data-testid="stMarkdownContainer"] > p {
+    font-size: 18px;
+}
+
+/* ============================================
+   Responsive Design (Future Enhancement)
+   ============================================ */
+
+/* Mobile styles - for screens smaller than 768px */
+@media (max-width: 768px) {
+    /* Reduce font sizes on mobile */
+    div[class*="stRadio"] > label > div[data-testid="stMarkdownContainer"] > p,
+    div[class*="stNumberInput"] > label > div[data-testid="stMarkdownContainer"] > p,
+    div[class*="stTextInput"] > label > div[data-testid="stMarkdownContainer"] > p {
+        font-size: 16px;
+    }
+    
+    /* Adjust sidebar padding */
+    ul[class="css-j7qwjs e1fqkh3o7"] {
+        padding-top: 1rem;
+    }
+}
+
+/* ============================================
+   Notes for Future Streamlit Versions
+   ============================================ */
+
+/*
+ * IMPORTANT: Some CSS class names (e.g., .css-zck4sz, .css-j7qwjs) are
+ * specific to Streamlit 1.17.0 and may change in future versions.
+ * 
+ * When upgrading Streamlit:
+ * 1. Inspect the DOM to find new class names
+ * 2. Update class selectors accordingly
+ * 3. Prefer data-testid attributes (more stable)
+ * 4. Consider using Streamlit's theming system
+ * 
+ * Data attributes used (more stable):
+ * - [data-testid="stHorizontalBlock"]
+ * - [data-testid="stMarkdownContainer"]
+ * 
+ * Partial class matches (more flexible):
+ * - div[class*="stRadio"]
+ * - div[class*="stNumberInput"]
+ * - div[class*="stTextInput"]
+ */
+

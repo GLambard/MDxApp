@@ -1,13 +1,24 @@
-import streamlit as st 
+import streamlit as st
 from streamlit.components.v1 import html
 from streamlit_extras.buy_me_a_coffee import button
 
 import os
 import json
+import sys
+from pathlib import Path
 
 import openai
 
+# Add src directory to path for imports
 path = os.path.dirname(__file__)
+project_root = Path(path).parent
+sys.path.insert(0, str(project_root))
+
+# Import new components and utilities
+from src.utils.styling import load_main_styles
+from src.utils.i18n import I18n
+from src.components.donation import render_sidebar_donation, render_inline_donation, get_default_qr_path
+from src.components.language_selector import render_language_selector, add_language_separator
 
 # Load translations from JSON file
 with open(path+"/../Assets/translations.json") as f:
@@ -42,70 +53,25 @@ st.set_page_config(
     layout="wide"
 )
 
-st.markdown("""
-  <style>
-      .css-zck4sz p {
-        font-weight: bold;
-        font-size: 18px;
-      }
-  </style>""", unsafe_allow_html=True)
+# Load external CSS styles
+load_main_styles(project_root)
 
-# Add the language selection dropdown    
-if 'lang_tmp' not in st.session_state:
-    st.session_state['lang_tmp'] = 'English'
-
-if 'lang_changed' not in st.session_state:
-    st.session_state['lang_changed'] = False
-
-if 'lang_select' in st.session_state:
-    #st.sidebar.markdown("<h3 style='text-align: center; color: black;'>{}</h3>".format(transl[st.session_state['lang_select']]["language_selection"]), unsafe_allow_html=True)
-    lang = st.sidebar.selectbox(transl[st.session_state['lang_select']]["language_selection"], options=list(transl.keys()), key='lang_select')
-else:
-    #st.sidebar.markdown("<h3 style='text-align: center; color: black;'>{}</h3>".format(transl[st.session_state['lang_tmp']]["language_selection"]), unsafe_allow_html=True)
-    lang = st.sidebar.selectbox(transl[st.session_state['lang_tmp']]["language_selection"], options=list(transl.keys()), key='lang_select')
-
-if lang != st.session_state['lang_tmp']:
-    st.session_state['lang_tmp'] = lang
-    st.session_state['lang_changed'] = True
-else:
-    st.session_state['lang_changed'] = False
+# Language selection using component
+lang = render_language_selector(transl, location="sidebar")
 
 # Line separator for clarity
-st.sidebar.markdown("""---""")
+add_language_separator(location="sidebar")
 
-# Font size and weight for the sidebar
-# Works with streamlit==1.17.0
-# TODO: Review class names for future versions
-st.markdown("""
-  <style>
-      ul[class="css-j7qwjs e1fqkh3o7"]{
-        position: relative;
-        padding-top: 2rem;
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-        align-items: center;
-      }
-      .css-17lntkn {
-        font-weight: bold;
-        font-size: 18px;
-        color: grey;
-      }
-      .css-pkbazv {
-        font-weight: bold;
-        font-size: 18px;
-      }
-  </style>""", unsafe_allow_html=True)
+# CSS now loaded from external file (pages/styles/main.css)
 
-# Buy me a coffee - MDxApp support
-button = f"""<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="geonosislaX" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Donate now" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>"""
+# Buy me a coffee - MDxApp support (using component)
 with st.sidebar:
-    st.markdown("<h3 style='text-align: center; color: black;'>{}</h3>".format(transl[lang]['bmc_0']), unsafe_allow_html=True)
-    st.markdown("<h4 style='text-align: left; color: black;'>{}</h4>".format(transl[lang]['bmc_1']), unsafe_allow_html=True)
-    html(button, height=70, width=220)
-    st.markdown("<h4 style='text-align: left; color: black;'>{}</h4>".format(transl[lang]['bmc_2']), unsafe_allow_html=True)
-    qr_name = path+"/../Materials/bmc_qr.png"
-    st.image(qr_name, caption= '', width = 220)
+    render_sidebar_donation(
+        username="geonosislaX",
+        translations=transl,
+        language=lang,
+        qr_image_path=get_default_qr_path(project_root)
+    )
 
 # Use GitHub logo file
 logo_name = path+"/../Materials/MDxApp_logo_v2_256.png"
@@ -129,39 +95,7 @@ st.write("<p style=\"font-weight: bold; font-size:18px;\">{}</p>".format(transl[
          "3. {}</p>".format(transl[lang]['htu_3']), 
          unsafe_allow_html=True)
 
-st.write(
-    """<style>
-    [data-testid="stHorizontalBlock"] {
-        align-items: center;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-## Font size configs
-st.markdown(
-    """<style>
-div[class*="stRadio"] > label > div[data-testid="stMarkdownContainer"] > p {
-    font-size: 18px;
-}
-    </style>
-    """, unsafe_allow_html=True)
-st.markdown(
-    """<style>
-div[class*="stNumberInput"] > label > div[data-testid="stMarkdownContainer"] > p {
-    font-size: 18px;
-}
-    </style>
-    """, unsafe_allow_html=True)
-st.markdown(
-    """<style>
-div[class*="stTextInput"] > label > div[data-testid="stMarkdownContainer"] > p {
-    font-size: 18px;
-}
-    </style>
-    """, unsafe_allow_html=True)
-####
+# All CSS now loaded from external file (pages/styles/main.css)
 
 st.subheader(":black_nib: **{}**".format(transl[lang]['report_header']))
 # Define columns
@@ -280,14 +214,15 @@ if submit_button:
                             unsafe_allow_html=True
                            )
                 
-                # Buy me a coffee - MDxApp support
-                st.markdown("""---""")
-                st.markdown("<h4 style='text-align: left; color: black;'>{}</h4>".format(transl[lang]['invest']), unsafe_allow_html=True)
-                st.markdown("<h5 style='text-align: left; color: black;'>{}</h5>".format(transl[lang]['bmc_1']), unsafe_allow_html=True)
-                html(button, height=70, width=220)
-                st.markdown("<h5 style='text-align: left; color: black;'>{}</h5>".format(transl[lang]['bmc_2']), unsafe_allow_html=True)
-                qr_name = path+"/../Materials/bmc_qr.png"
-                st.image(qr_name, caption= '', width = 220)
+                # Buy me a coffee - MDxApp support (using component)
+                render_inline_donation(
+                    username="geonosislaX",
+                    translations=transl,
+                    language=lang,
+                    qr_image_path=get_default_qr_path(project_root),
+                    show_separator=True,
+                    invest_message=True
+                )
             except Exception as e: 
                 #st.write(e) 
                 st.write("<p style=\"font-weight: bold; font-size:18px;\">{}</p>".format(transl[lang]['no_response']), 

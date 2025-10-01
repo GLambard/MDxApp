@@ -1,0 +1,91 @@
+# Pre-commit hooks configuration for MDxApp
+# Run: pre-commit install
+# Then: pre-commit run --all-files
+
+repos:
+  # Black - Python code formatter
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        language_version: python3.10
+        args: ['--config', 'pyproject.toml']
+
+  # Ruff - Fast Python linter
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+
+  # Mypy - Static type checker
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - pydantic>=2.9.0
+          - types-requests
+        args: ['--config-file', 'pyproject.toml']
+        exclude: '^tests/'
+
+  # General file cleanup
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Check for files that would conflict in case-insensitive filesystems
+      - id: check-case-conflict
+      
+      # Check for merge conflicts
+      - id: check-merge-conflict
+      
+      # Check YAML files for syntax errors
+      - id: check-yaml
+        exclude: '.pre-commit-config.yaml'
+      
+      # Check JSON files for syntax errors
+      - id: check-json
+      
+      # Check for added large files
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      
+      # Ensure files end with newline
+      - id: end-of-file-fixer
+        exclude: '\.json$'
+      
+      # Remove trailing whitespace
+      - id: trailing-whitespace
+        exclude: '\.md$'
+      
+      # Check for private keys
+      - id: detect-private-key
+      
+      # Check Python files for syntax errors
+      - id: check-ast
+      
+      # Fix mixed line endings
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Check for common security issues
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.10
+    hooks:
+      - id: bandit
+        args: ['-c', 'pyproject.toml', '-r', 'src/']
+        additional_dependencies: ['bandit[toml]']
+
+# Configuration
+default_language_version:
+  python: python3.10
+
+# Only run on specific stages
+default_stages: [commit]
+
+# Fail fast - stop on first failure
+fail_fast: false
+
+# Minimum pre-commit version
+minimum_pre_commit_version: '3.0.0'
+

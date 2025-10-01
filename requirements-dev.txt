@@ -12,6 +12,7 @@ black>=24.0.0          # Code formatting
 ruff>=0.5.0           # Fast Python linter
 mypy>=1.10.0          # Static type checking
 isort>=5.13.0         # Import sorting
+bandit[toml]>=1.7.0   # Security linter
 
 # Pre-commit hooks
 pre-commit>=3.7.0

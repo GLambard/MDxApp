@@ -1,12 +1,21 @@
 import streamlit as st
 from streamlit.components.v1 import html
-from streamlit_extras.buy_me_a_coffee import button
 import os
+import sys
+from pathlib import Path
+
+# Add src directory to path for imports
+path = os.path.dirname(__file__)
+project_root = Path(path).parent.parent
+sys.path.insert(0, str(project_root))
+
+# Import new components and utilities
+from src.utils.styling import load_main_styles
+from src.components.donation import render_sidebar_donation, get_default_qr_path
 
 # Trick to preserve the state of your widgets across pages
 for k, v in st.session_state.items():
     st.session_state[k] = v
-##
 
 st.set_page_config(
     page_title="About",
@@ -14,40 +23,26 @@ st.set_page_config(
     layout="wide"
 )
 
-# Works with streamlit==1.17.0
-# TODO: Review class names for future versions
-st.markdown("""
-  <style>
-      ul[class="css-j7qwjs e1fqkh3o7"]{
-        position: relative;
-        padding-top: 2rem;
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-        align-items: center;
-      }
-      .css-17lntkn {
-        font-weight: bold;
-        font-size: 18px;
-        color: grey;
-      }
-      .css-pkbazv {
-        font-weight: bold;
-        font-size: 18px;
-      }
-  </style>""", unsafe_allow_html=True)
+# Load external CSS styles
+load_main_styles(project_root)
 
-path = os.path.dirname(__file__)
+# Buy me a coffee - MDxApp support (using component)
+# Using English translations for About page (hardcoded for simplicity)
+translations_en = {
+    "English": {
+        "bmc_0": "Let's keep MDxApp free!",
+        "bmc_1": "By clicking here:",
+        "bmc_2": "Or use this QR code:"
+    }
+}
 
-# Buy me a coffee - MDxApp support
-button = f"""<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="geonosislaX" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>"""
 with st.sidebar:
-    st.markdown("<h3 style='text-align: center; color: black;'>Let's keep MDxApp free!</h3>", unsafe_allow_html=True)
-    st.markdown("<h4 style='text-align: left; color: black;'>By clicking here:</h4>", unsafe_allow_html=True)
-    html(button, height=70, width=220)
-    st.markdown("<h4 style='text-align: left; color: black;'>Or use this QR code:</h4>", unsafe_allow_html=True)
-    qr_name = path+"/../../Materials/bmc_qr.png"
-    st.image(qr_name, caption= '', width = 220)
+    render_sidebar_donation(
+        username="geonosislaX",
+        translations=translations_en,
+        language="English",
+        qr_image_path=get_default_qr_path(project_root)
+    )
 
 st.header("About")
 
