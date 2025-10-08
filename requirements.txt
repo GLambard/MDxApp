@@ -1,3 +1,19 @@
-openai==0.27.0
-streamlit==1.17.0
-streamlit-extras==0.2.6
+# Production dependencies for MDxApp
+# Install with: pip install -r requirements.txt
+
+# Core dependencies - UPDATED VERSIONS
+openai>=1.50.0                # OpenAI API client (modernized)
+streamlit>=1.38.0             # Web framework (updated)
+streamlit-extras>=0.4.0       # Additional Streamlit components
+
+# Data validation and settings
+pydantic>=2.9.0               # Data validation (new)
+pydantic-settings>=2.5.0      # Settings management (new)
+
+# Environment management
+python-dotenv>=1.0.0          # Load .env files (new)
+
+# Note: For backward compatibility during migration, you can temporarily
+# install both old and new versions:
+# openai==0.27.0  # Legacy version (remove after migration)
+# openai>=1.50.0  # New version

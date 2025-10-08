@@ -276,3 +276,21 @@ docs/.doctrees/
 
 # notes
 notes/
+
+# test files
+tests/
+
+# test data
+test_data/
+
+# test results
+test_results/
+
+# test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.ruff_cache/
+
+# secrets
+.streamlit/
