@@ -9,22 +9,35 @@ import streamlit as st
 
 from ..utils.locale import sort_languages
 
+# Persists across multipage navigation (widget keys are cleared when a page unmounts).
+MDX_LANGUAGE_KEY = "mdx_language"
+_LEGACY_WIDGET_KEY = "lang_select"
+
 
 def initialize_language_state(default_language: str = "English") -> None:
-    """
-    Initialize language-related session state variables.
-
-    Args:
-        default_language: Default language to use
-    """
-    if "lang_tmp" not in st.session_state:
-        st.session_state["lang_tmp"] = default_language
+    """Initialize canonical language in session (not tied to a widget key)."""
+    if MDX_LANGUAGE_KEY not in st.session_state:
+        # Migrate from old widget-only state if present
+        if _LEGACY_WIDGET_KEY in st.session_state:
+            st.session_state[MDX_LANGUAGE_KEY] = st.session_state[_LEGACY_WIDGET_KEY]
+        else:
+            st.session_state[MDX_LANGUAGE_KEY] = default_language
 
     if "lang_changed" not in st.session_state:
         st.session_state["lang_changed"] = False
 
-    if "lang_select" not in st.session_state:
-        st.session_state["lang_select"] = default_language
+
+def get_current_language() -> str:
+    """Return the active UI language (same on every page)."""
+    initialize_language_state()
+    return str(st.session_state.get(MDX_LANGUAGE_KEY, "English"))
+
+
+def _language_index(available_languages: List[str], current: str) -> int:
+    try:
+        return available_languages.index(current)
+    except ValueError:
+        return 0
 
 
 def render_language_selector(
@@ -36,84 +49,53 @@ def render_language_selector(
     Args:
         translations: Translation dictionary with all languages
         location: Where to render ("sidebar" or "main")
-        key: Session state key for the selectbox
+        key: Ignored (kept for API compatibility); language uses MDX_LANGUAGE_KEY
 
     Returns:
         str: Selected language
     """
-    # Initialize state if needed
+    del key  # Canonical state is MDX_LANGUAGE_KEY, not a widget key
     initialize_language_state()
 
-    # Get available languages (stable display order)
-    available_languages: List[str] = sort_languages(translations)
+    available_languages = sort_languages(translations)
+    current = get_current_language()
+    if current not in translations:
+        current = "English"
+        st.session_state[MDX_LANGUAGE_KEY] = current
 
-    # Get current language for label
-    current_lang = st.session_state.get(key, "English")
-    if current_lang not in translations:
-        current_lang = "English"
+    label = translations[current].get("language_selection", "Select a language:")
+    idx = _language_index(available_languages, current)
 
-    # Get translated label
-    label_key = "language_selection"
-    label = translations[current_lang].get(label_key, "Select a language:")
-
-    # Render selectbox in appropriate location
+    # No widget key: index comes from MDX_LANGUAGE_KEY so language survives page changes
     if location == "sidebar":
-        selected_lang = st.sidebar.selectbox(label, options=available_languages, key=key)
+        selected_lang = st.sidebar.selectbox(label, available_languages, index=idx)
     else:
-        selected_lang = st.selectbox(label, options=available_languages, key=key)
+        selected_lang = st.selectbox(label, available_languages, index=idx)
 
-    # Track language changes and rerun so all widgets reload translated labels
-    previous = st.session_state.get("lang_tmp", "English")
-    if selected_lang != previous:
-        st.session_state["lang_tmp"] = selected_lang
+    if selected_lang != st.session_state.get(MDX_LANGUAGE_KEY):
+        st.session_state[MDX_LANGUAGE_KEY] = selected_lang
         st.session_state["lang_changed"] = True
         handle_language_change()
         st.rerun()
+
     st.session_state["lang_changed"] = False
-
-    return selected_lang
-
-
-def get_current_language() -> str:
-    """
-    Get the currently selected language.
-
-    Returns:
-        str: Current language name
-    """
-    lang = st.session_state.get("lang_select", "English")
-    return str(lang)
+    return get_current_language()
 
 
 def language_changed() -> bool:
-    """
-    Check if language was changed in this session.
-
-    Returns:
-        bool: True if language was just changed
-    """
-    changed = st.session_state.get("lang_changed", False)
-    return bool(changed)
+    """Check if language was changed on the previous interaction."""
+    return bool(st.session_state.get("lang_changed", False))
 
 
 def clear_language_dependent_state() -> None:
-    """
-    Clear session state variables that depend on language.
-    Useful when language changes to reset form values.
-    """
-    # List of keys to clear when language changes
-    language_dependent_keys = ["gender", "pregnant", "gender_code", "pregnant_code"]
-
-    for key in language_dependent_keys:
-        if key in st.session_state:
-            del st.session_state[key]
+    """Clear form widgets that depend on translated option labels."""
+    for widget_key in ("gender", "pregnant", "gender_code", "pregnant_code"):
+        if widget_key in st.session_state:
+            del st.session_state[widget_key]
 
 
 def handle_language_change() -> None:
-    """
-    Handle language change event.
-    Clears language-dependent state if language was changed.
-    """
+    """Reset language-dependent widgets after a language change."""
     if language_changed():
         clear_language_dependent_state()
 
@@ -121,41 +103,22 @@ def handle_language_change() -> None:
 def render_language_selector_with_header(
     translations: Dict[str, Dict[str, Any]], show_header: bool = False, location: str = "sidebar"
 ) -> str:
-    """
-    Render language selector with optional header.
-
-    Args:
-        translations: Translation dictionary
-        show_header: Whether to show header above selector
-        location: Where to render ("sidebar" or "main")
-
-    Returns:
-        str: Selected language
-    """
+    """Render language selector with optional header."""
     current_lang = get_current_language()
 
-    # Optional header
     if show_header:
         header_text = translations[current_lang].get("language_selection", "Select a language:")
-        header_html = (
-            f'<p class="mdx-donation-title mdx-donation-center">{header_text}</p>'
-        )
+        header_html = f'<p class="mdx-donation-title mdx-donation-center">{header_text}</p>'
         if location == "sidebar":
             st.sidebar.markdown(header_html, unsafe_allow_html=True)
         else:
             st.markdown(header_html, unsafe_allow_html=True)
 
-    # Render selector
     return render_language_selector(translations, location)
 
 
 def add_language_separator(location: str = "sidebar") -> None:
-    """
-    Add a visual separator after language selection.
-
-    Args:
-        location: Where to add separator ("sidebar" or "main")
-    """
+    """Add a visual separator after language selection."""
     if location == "sidebar":
         st.sidebar.markdown("---")
     else:
