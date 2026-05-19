@@ -3,9 +3,11 @@ Language selector component for multi-language support.
 Manages language selection and state across page navigation.
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import streamlit as st
+
+from ..utils.locale import sort_languages
 
 
 def initialize_language_state(default_language: str = "English") -> None:
@@ -42,8 +44,8 @@ def render_language_selector(
     # Initialize state if needed
     initialize_language_state()
 
-    # Get available languages
-    available_languages = list(translations.keys())
+    # Get available languages (stable display order)
+    available_languages: List[str] = sort_languages(translations)
 
     # Get current language for label
     current_lang = st.session_state.get(key, "English")

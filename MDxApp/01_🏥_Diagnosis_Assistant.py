@@ -35,6 +35,7 @@ from src.components.patient_form import (
 )
 from src.config.settings import get_settings
 from src.services.diagnosis_service import get_diagnosis_service
+from src.utils.locale import apply_rtl_layout
 from src.utils.styling import load_main_styles
 
 
@@ -123,6 +124,7 @@ st.set_page_config(page_title="Diagnosis_Assistant", page_icon="🏥", layout="w
 load_main_styles(project_root)
 
 lang = render_language_selector(transl, location="sidebar")
+apply_rtl_layout(lang)
 add_language_separator(location="sidebar")
 
 with st.sidebar:

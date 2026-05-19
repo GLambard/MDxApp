@@ -92,7 +92,7 @@ class DiagnosisAIClient:
     def __init__(
         self,
         api_key: str,
-        model: str = "gpt-5-mini",
+        model: str = "gpt-5.4-nano",
         temperature: float = 1.0,
         max_tokens: int = 2000,
         frequency_penalty: float = 0.0,
@@ -104,7 +104,7 @@ class DiagnosisAIClient:
 
         Args:
             api_key: OpenAI API key
-            model: Model name (default: gpt-5-mini)
+            model: Model name (default: gpt-5.4-nano)
             temperature: Sampling temperature (ignored for GPT-5 models)
             max_tokens: Maximum completion tokens (default: 2000)
             frequency_penalty: Frequency penalty (not supported by GPT-5 Mini)
@@ -125,7 +125,8 @@ class DiagnosisAIClient:
                 self.max_completion_tokens, structured=True
             )
             self.logger.info(
-                "Initialized DiagnosisAIClient with GPT-5 Mini (max_completion_tokens=%s)",
+                "Initialized DiagnosisAIClient with %s (max_completion_tokens=%s)",
+                self.model,
                 self.max_completion_tokens,
             )
         else:

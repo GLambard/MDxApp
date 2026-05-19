@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mdxapp"
-version = "2.5.0"
+version = "2.5.1"
 description = "Medical Diagnosis Assistant powered by ChatGPT"
 authors = [{name = "Guillaume Lambard"}]
 readme = "README.md"

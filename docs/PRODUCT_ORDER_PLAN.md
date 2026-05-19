@@ -1,7 +1,7 @@
 # MDxApp Product Roadmap — Implementation Plan
 
-**Status:** Phase 2 complete (v2.5.0) — polish pass in progress  
-**Stack:** Streamlit + `src/` services + GPT-5 Mini
+**Status:** v2.5.1 — Phase 2 complete; default model **gpt-5.4-nano**  
+**Stack:** Streamlit + `src/` services + OpenAI GPT-5 family (`openai_api_model` in secrets)
 
 ---
 
@@ -17,10 +17,12 @@
 | 2A | PDF export (ReportLab) | ✅ |
 | 2B | Evidence references | ✅ (ICD-10 display off by default — regional variance) |
 | 2C | Medical imaging | ✅ code; **disabled** in secrets (`enable_medical_imaging = false`) |
-| 2D | 10 languages | ✅ |
+| 2D | 15 languages + RTL (Arabic) + localized About/Contact | ✅ |
 | 2E | Drug interactions (OpenFDA + LLM) | ✅ |
 
 ### Recent polish (2026)
+- Default model **`gpt-5.4-nano`** (`openai_api_model` in `.streamlit/secrets.toml`)
+- **15 languages**, Arabic RTL, localized About/Contact (shared sidebar language selector)
 - About page updated for v2.5
 - Evidence sanitization (PubMed URLs, dedupe, no fabricated links in prompt)
 - OpenAI token usage logging + optional sidebar display

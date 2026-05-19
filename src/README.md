@@ -71,7 +71,7 @@ from src.core.ai_client import DiagnosisAIClient
 from src.core.prompt_builder import PromptBuilder
 
 # Create AI client
-client = DiagnosisAIClient(api_key="...", model="gpt-5-mini")
+client = DiagnosisAIClient(api_key="...", model="gpt-5.4-nano")
 
 # Build prompt
 builder = PromptBuilder(prompt_words, translations)

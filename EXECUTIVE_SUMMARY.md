@@ -1,9 +1,9 @@
 # MDxApp - Executive Summary & Next Steps
 
 **Application:** Medical Diagnosis Assistant  
-**Version:** 2.5.0  
+**Version:** 2.5.1  
 **Date:** May 2026  
-**Status:** Phase 2 complete + polish (PDF, evidence, 10 languages, drug checks; imaging off; ICD-10 hidden by default)
+**Status:** v2.5.1 — Phase 2 complete; **gpt-5.4-nano** default; 15 languages + Arabic RTL; localized About/Contact
 
 ---
 
@@ -40,7 +40,7 @@
 ### Successfully Upgraded to GPT-5 Mini
 
 **From:** gpt-3.5-turbo (2023 model)  
-**To:** gpt-5-mini (August 2025 release)
+**To:** gpt-5.4-nano (GPT-5 family; configured via `openai_api_model` in secrets)
 
 **Key Features Enabled:**
 - 🚀 **400,000 token context** (25x increase)
@@ -68,7 +68,7 @@
 - ✅ Physical exam findings
 - ✅ Lab results integration
 - ✅ AI-powered diagnosis
-- ✅ Multi-language (10 languages)
+- ✅ Multi-language (15 languages, Arabic RTL, localized About/Contact)
 - ✅ PDF diagnosis report download
 - ✅ Educational references (sanitized links / PubMed)
 - ✅ Medication interaction warnings

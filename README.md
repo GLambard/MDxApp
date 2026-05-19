@@ -6,18 +6,18 @@ Here, we want to make the access to a large knowledge in
 medical diagnosis available to an as broad as possible community of 
 medical professionals and individuals seeking access to a fast medical diagnosis tool.  
 
-For this, we have developed the **MDxApp** that's using **GPT-5 Mini** 
-(OpenAI's latest AI model with 400K context window and multimodal capabilities) to assist you in proposing 
+For this, we have developed the **MDxApp** that's using **GPT-5.4-nano** 
+(OpenAI's GPT-5 family model with structured outputs and a large context window) to assist you in proposing 
 a quick diagnostic according to a patient's demographics, a recent environmental context, 
 a list of symptoms, recent and relevant observations on the patient's state, and any existing 
 chronic condition(s) followed by indications on any existing treatment(s).
 
-**New in v2.0:** Powered by GPT-5 Mini with structured outputs, enhanced prompting strategies, and improved diagnostic accuracy.
+**Current (v2.5.1):** GPT-5.4-nano, structured diagnosis, PDF export, 15 languages, educational references, and medication safety notes.
 
 ## Configuration
 
 1. Copy [`.streamlit/secrets.toml.example`](.streamlit/secrets.toml.example) to `.streamlit/secrets.toml`.
-2. Set your `openai_api_key` and `openai_api_model` (recommended: `gpt-5-mini`).
+2. Set your `openai_api_key` and `openai_api_model` (default: `gpt-5.4-nano`).
 3. Enable feature flags (defaults in the example):
    - `use_new_ai_client = true`
    - `use_structured_outputs = true`

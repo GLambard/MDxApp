@@ -24,3 +24,19 @@ input[type=text], input[type=email], textarea {
   button[type=submit]:hover {
     background-color: #45a049;
   }
+
+/* RTL contact form (Arabic) */
+form[dir="rtl"] input[type=text],
+form[dir="rtl"] textarea {
+  text-align: right;
+  direction: rtl;
+}
+
+form[dir="rtl"] input[type=email] {
+  direction: ltr;
+  text-align: left;
+}
+
+form[dir="rtl"] button[type=submit] {
+  float: left;
+}

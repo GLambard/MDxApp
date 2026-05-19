@@ -19,7 +19,7 @@ class Settings:
         """Initialize settings from Streamlit secrets."""
         # OpenAI Configuration
         self.openai_api_key: str = st.secrets.get("openai_api_key", "")
-        self.openai_model: str = st.secrets.get("openai_api_model", "gpt-5-mini")
+        self.openai_model: str = st.secrets.get("openai_api_model", "gpt-5.4-nano")
         # Ignored for gpt-5* models (only default temperature supported)
         self.openai_temperature: float = float(st.secrets.get("openai_api_temp", 1.0))
         # GPT-5: reasoning tokens count toward this limit; use >= 8000 for structured output.
@@ -35,7 +35,7 @@ class Settings:
 
         # Application Configuration
         self.app_title: str = "MDxApp - Medical Diagnosis Assistant"
-        self.app_version: str = str(st.secrets.get("app_version", "2.5.0"))
+        self.app_version: str = str(st.secrets.get("app_version", "2.5.1"))
         self.app_icon: str = "🏥"
 
         # Contact Configuration
