@@ -2,6 +2,7 @@
 
 from .ai_client import (
     DiagnosisAIClient,
+    DiagnosisAPIResult,
     LegacyAIClient,
     StructuredDiagnosisOutput,
 )
@@ -10,6 +11,7 @@ from .prompts import GPT5MiniPrompts, create_enhanced_prompts
 
 __all__ = [
     "DiagnosisAIClient",
+    "DiagnosisAPIResult",
     "LegacyAIClient",
     "StructuredDiagnosisOutput",
     "PromptBuilder",

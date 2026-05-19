@@ -20,10 +20,12 @@ class Settings:
         # OpenAI Configuration
         self.openai_api_key: str = st.secrets.get("openai_api_key", "")
         self.openai_model: str = st.secrets.get("openai_api_model", "gpt-5-mini")
-        self.openai_temperature: float = float(st.secrets.get("openai_api_temp", 0.7))
-        self.openai_max_tokens: int = int(st.secrets.get("openai_api_maxtok", 1000))
+        # Ignored for gpt-5* models (only default temperature supported)
+        self.openai_temperature: float = float(st.secrets.get("openai_api_temp", 1.0))
+        self.openai_max_tokens: int = int(st.secrets.get("openai_api_maxtok", 2000))
         self.openai_frequency_penalty: float = float(st.secrets.get("openai_api_freqp", 0.0))
         self.openai_presence_penalty: float = float(st.secrets.get("openai_api_presp", 0.0))
+        self.openai_timeout_seconds: float = float(st.secrets.get("openai_api_timeout", 120.0))
 
         # Application Configuration
         self.app_title: str = "MDxApp - Medical Diagnosis Assistant"
@@ -38,12 +40,12 @@ class Settings:
         self.prompt_system: str = prompt_canvas.get("prompt_system", "")
         self.prompt_words: List[str] = prompt_canvas.get("prompt_words", [])
 
-        # Feature Flags (for gradual migration)
-        self.use_new_ai_client: bool = st.secrets.get("use_new_ai_client", False)
+        # Feature Flags (GPT-5 Mini path enabled by default)
+        self.use_new_ai_client: bool = st.secrets.get("use_new_ai_client", True)
         self.enable_logging: bool = st.secrets.get("enable_logging", True)
-        self.enable_validation: bool = st.secrets.get("enable_validation", False)
-        self.use_structured_outputs: bool = st.secrets.get("use_structured_outputs", False)
-        self.use_gpt5_mini_prompts: bool = st.secrets.get("use_gpt5_mini_prompts", False)
+        self.enable_validation: bool = st.secrets.get("enable_validation", True)
+        self.use_structured_outputs: bool = st.secrets.get("use_structured_outputs", True)
+        self.use_gpt5_mini_prompts: bool = st.secrets.get("use_gpt5_mini_prompts", True)
 
         # Donation Configuration
         self.bmc_username: str = "geonosislaX"
@@ -60,11 +62,11 @@ class Settings:
         if not self.openai_api_key:
             raise ValueError("OpenAI API key is required")
 
-        if not self.prompt_system:
-            raise ValueError("System prompt is required")
+        if not self.prompt_system and not self.use_gpt5_mini_prompts:
+            raise ValueError("System prompt is required when use_gpt5_mini_prompts is false")
 
-        if not self.prompt_words:
-            raise ValueError("Prompt words are required")
+        if not self.prompt_words and not self.use_gpt5_mini_prompts:
+            raise ValueError("Prompt words are required when use_gpt5_mini_prompts is false")
 
         return True
 

@@ -3,13 +3,13 @@
 **Application:** Medical Diagnosis Assistant  
 **Version:** 2.0.0 (Modernized)  
 **Date:** October 2025  
-**Status:** ✅ Production Ready with GPT-5 Mini
+**Status:** Phase 0–1 integrated — modular stack wired to Streamlit UI with GPT-5 Mini structured outputs
 
 ---
 
 ## 🎯 What We've Accomplished
 
-### Complete Modernization (100% Done)
+### Foundation + Phase 0–1 (Modular stack live in UI)
 
 **Transformed From:**
 - Monolithic code structure
@@ -22,7 +22,7 @@
 **Transformed To:**
 - ✅ Modular architecture (17 source modules)
 - ✅ Latest dependencies (GPT-5 Mini, Streamlit 1.38+, Pydantic V2)
-- ✅ Comprehensive testing (18 tests, all passing)
+- ✅ Test suite (`tests/`, 25+ tests) covering models, prompts, AI client, diagnosis service
 - ✅ External CSS (maintainable, mobile-responsive)
 - ✅ Automated quality (Black, Ruff, Mypy, pre-commit)
 - ✅ Extensive documentation (15 files, 8,000+ lines)

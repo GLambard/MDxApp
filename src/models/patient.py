@@ -41,13 +41,13 @@ class PatientData(BaseModel):
     gender: str = Field(..., description="Patient gender")
     age: int = Field(..., ge=0, le=150, description="Patient age in years")
     is_pregnant: str = Field(default="no", description="Pregnancy status")
-    history: Optional[str] = Field(default=None, max_length=250, description="Patient history")
-    symptoms: str = Field(..., min_length=1, max_length=250, description="Patient symptoms")
+    history: Optional[str] = Field(default=None, max_length=2000, description="Patient history")
+    symptoms: str = Field(..., min_length=1, max_length=2000, description="Patient symptoms")
     exam_findings: Optional[str] = Field(
-        default=None, max_length=250, description="Examination findings"
+        default=None, max_length=2000, description="Examination findings"
     )
     lab_results: Optional[str] = Field(
-        default=None, max_length=250, description="Laboratory results"
+        default=None, max_length=2000, description="Laboratory results"
     )
     language: str = Field(default="English", description="Preferred language")
 

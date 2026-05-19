@@ -53,6 +53,15 @@
         "no_response": "The server does not respond or is overloaded with requests... Try again.", 
         "no_diagnostic": "No diagnostic yet. Please fill out the report and click SUBMIT above.", 
         "language_selection": "Select a language: ", 
+        "dx_primary": "Primary Diagnosis",
+        "dx_confidence": "Confidence",
+        "dx_differential": "Differential Diagnoses",
+        "dx_next_steps": "Recommended Next Steps",
+        "dx_considerations": "Important Considerations",
+        "dx_reasoning": "Clinical Reasoning",
+        "dx_confidence_high": "HIGH",
+        "dx_confidence_medium": "MEDIUM",
+        "dx_confidence_low": "LOW",
         "invest": "Invest in your health, and support our mission in keeping the MDxApp free!"
     },
     "Français": {
@@ -109,6 +118,15 @@
         "no_response": "Le serveur ne répond pas ou est surchargé de demandes... Réessayez.", 
         "no_diagnostic": "Pas encore de diagnostic. Veuillez remplir le rapport et cliquer sur SOUMETTRE ci-dessus.", 
         "language_selection": "Sélectionner une langue: ", 
+        "dx_primary": "Diagnostic principal",
+        "dx_confidence": "Confiance",
+        "dx_differential": "Diagnostics différentiels",
+        "dx_next_steps": "Prochaines étapes recommandées",
+        "dx_considerations": "Considérations importantes",
+        "dx_reasoning": "Raisonnement clinique",
+        "dx_confidence_high": "ÉLEVÉE",
+        "dx_confidence_medium": "MOYENNE",
+        "dx_confidence_low": "FAIBLE",
         "invest": "Investissez dans votre santé et soutenez notre mission en gardant le MDxApp gratuit!"
     }, 
     "日本語": {
@@ -165,6 +183,15 @@
         "no_response": "サーバーが応答しないか、リクエストで負荷がかかっている...。再度お試しください。", 
         "no_diagnostic": "まだ診断していません。レポートに必要事項を記入し、上のサブミットをクリックしてください。", 
         "language_selection": "言語を選択する： ", 
+        "dx_primary": "主診断",
+        "dx_confidence": "信頼度",
+        "dx_differential": "鑑別診断",
+        "dx_next_steps": "推奨される次のステップ",
+        "dx_considerations": "重要な考慮事項",
+        "dx_reasoning": "臨床的理由",
+        "dx_confidence_high": "高",
+        "dx_confidence_medium": "中",
+        "dx_confidence_low": "低",
         "invest": "あなたの健康に投資し、MDxAppの無料化を維持する私たちの使命をサポートしてください!"
     }, 
     "Español": {
@@ -221,6 +248,15 @@
         "no_response": "El servidor no responde o está sobrecargado de peticiones... Inténtelo de nuevo.", 
         "no_diagnostic": "Aún no hay diagnóstico. Por favor, rellene el informe y haga clic en ENVIAR arriba.", 
         "language_selection": "Selecciona un idioma: ", 
+        "dx_primary": "Diagnóstico principal",
+        "dx_confidence": "Confianza",
+        "dx_differential": "Diagnósticos diferenciales",
+        "dx_next_steps": "Próximos pasos recomendados",
+        "dx_considerations": "Consideraciones importantes",
+        "dx_reasoning": "Razonamiento clínico",
+        "dx_confidence_high": "ALTA",
+        "dx_confidence_medium": "MEDIA",
+        "dx_confidence_low": "BAJA",
         "invest": "¡Invierte en tu salud y apoya nuestra misión para que MDxApp siga siendo gratuita!"
     }, 
     "Deutsch": {
@@ -277,6 +313,15 @@
         "no_response": "Der Server antwortet nicht oder ist mit Anfragen überlastet... Versuchen Sie es erneut.", 
         "no_diagnostic": "Noch keine Diagnose. Bitte füllen Sie den Bericht aus und klicken Sie oben auf SUBMIT.", 
         "language_selection": "Wählen Sie eine Sprache: ", 
+        "dx_primary": "Hauptdiagnose",
+        "dx_confidence": "Vertrauen",
+        "dx_differential": "Differentialdiagnosen",
+        "dx_next_steps": "Empfohlene nächste Schritte",
+        "dx_considerations": "Wichtige Überlegungen",
+        "dx_reasoning": "Klinische Begründung",
+        "dx_confidence_high": "HOCH",
+        "dx_confidence_medium": "MITTEL",
+        "dx_confidence_low": "NIEDRIG",
         "invest": "Investieren Sie in Ihre Gesundheit und unterstützen Sie unsere Mission, die MDxApp kostenlos zu halten!"
     }
 }

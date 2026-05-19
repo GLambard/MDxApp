@@ -12,7 +12,25 @@ a quick diagnostic according to a patient's demographics, a recent environmental
 a list of symptoms, recent and relevant observations on the patient's state, and any existing 
 chronic condition(s) followed by indications on any existing treatment(s).
 
-**New in v2.0:** Powered by GPT-5 Mini with structured outputs, enhanced prompting strategies, and improved diagnostic accuracy. 
+**New in v2.0:** Powered by GPT-5 Mini with structured outputs, enhanced prompting strategies, and improved diagnostic accuracy.
+
+## Configuration
+
+1. Copy [`.streamlit/secrets.toml.example`](.streamlit/secrets.toml.example) to `.streamlit/secrets.toml`.
+2. Set your `openai_api_key` and `openai_api_model` (recommended: `gpt-5-mini`).
+3. Enable feature flags (defaults in the example):
+   - `use_new_ai_client = true`
+   - `use_structured_outputs = true`
+   - `use_gpt5_mini_prompts = true`
+
+**Streamlit Cloud:** paste the same keys in your app **Settings → Secrets** (see the example file for the full template).
+
+Run locally:
+
+```bash
+pip install -r requirements.txt
+streamlit run "MDxApp/01_🏥_Diagnosis_Assistant.py"
+```
 
 Patient's demographics, context, symptoms, observations, chronic conditions added to any relevant information 
 can all be entered in plain text in the app. The medical jargon with known abbreviations is fully supported. 

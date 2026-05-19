@@ -21,8 +21,14 @@ src/
 │   ├── __init__.py
 │   ├── i18n.py             # Internationalization helpers
 │   └── logger.py           # Logging configuration
-└── components/              # Reusable UI components (future)
-    └── __init__.py
+├── services/                # Application services
+│   ├── __init__.py
+│   └── diagnosis_service.py # Diagnosis orchestration (settings + AI + prompts)
+└── components/              # Reusable UI components
+    ├── patient_form.py
+    ├── diagnosis_display.py
+    ├── language_selector.py
+    └── donation.py
 ```
 
 ## Module Overview
@@ -65,7 +71,7 @@ from src.core.ai_client import DiagnosisAIClient
 from src.core.prompt_builder import PromptBuilder
 
 # Create AI client
-client = DiagnosisAIClient(api_key="...", model="gpt-4o-mini")
+client = DiagnosisAIClient(api_key="...", model="gpt-5-mini")
 
 # Build prompt
 builder = PromptBuilder(prompt_words, translations)
@@ -127,14 +133,17 @@ logger = get_logger(__name__)
 logger.info("Processing diagnosis request")
 ```
 
-### `components/` (Future)
+### `services/`
+**Purpose:** Orchestration layer between UI, settings, and AI
+
+- `diagnosis_service.py`: `DiagnosisService.run()` — structured or plain diagnosis, error mapping, prompt selection via feature flags
+
+### `components/`
 **Purpose:** Reusable Streamlit UI components
 
-Planned components:
-- Donation button
-- Language selector
-- Patient form
-- Diagnosis display
+- `patient_form.py`: Demographics, history fields, validation, session-state helpers
+- `diagnosis_display.py`: Internationalized HTML for structured diagnoses
+- `language_selector.py`, `donation.py`: Sidebar UX
 
 ## Design Principles
 
@@ -171,14 +180,16 @@ Each module has a single, well-defined responsibility:
 - Type hints for better IDE support
 - README files in each major directory
 
-## Migration Strategy
+## Feature flags (Streamlit secrets)
 
-The new modules can be used alongside the existing code:
+| Flag | Default | Purpose |
+|------|---------|---------|
+| `use_new_ai_client` | `true` | OpenAI SDK v1.x + GPT-5 parameter handling |
+| `use_structured_outputs` | `true` | Pydantic structured differential diagnosis UI |
+| `use_gpt5_mini_prompts` | `true` | Enhanced system/user prompts for GPT-5 Mini |
+| `enable_validation` | `true` | Pydantic validation on patient data |
 
-1. **Feature Flag Approach**: Use `settings.use_new_ai_client` flag
-2. **Gradual Migration**: Replace one component at a time
-3. **Backward Compatibility**: Legacy client available for fallback
-4. **Testing**: Extensive tests before full migration
+See [`.streamlit/secrets.toml.example`](../.streamlit/secrets.toml.example).
 
 ## Example: Full Integration
 
@@ -215,10 +226,12 @@ client = DiagnosisAIClient(
     api_key=settings.openai_api_key,
     model=settings.openai_model,
     temperature=settings.openai_temperature,
-    max_tokens=settings.openai_max_tokens
+    max_tokens=settings.openai_max_tokens,
 )
 
-diagnosis = client.get_diagnosis(system_prompt, user_prompt)
+api_result = client.get_diagnosis(system_prompt, user_prompt)
+if api_result.success:
+    print(api_result.content)
 ```
 
 ## Testing

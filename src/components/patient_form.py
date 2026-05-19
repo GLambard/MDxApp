@@ -101,7 +101,7 @@ def render_medical_history_fields(
         f"**{trans['history']}** *{trans['hist_example']}*",
         placeholder=trans["hist_ph"],
         key="context",
-        max_chars=250,
+        max_chars=2000,
         help=f":green[**{trans['hist_help']}**]",
     )
 
@@ -110,7 +110,7 @@ def render_medical_history_fields(
         f"**{trans['symptoms']}** *{trans['symp_example']}*",
         placeholder=trans["symp_ph"],
         key="symptoms",
-        max_chars=250,
+        max_chars=2000,
         help=f":green[**{trans['symp_help']}**]",
     )
 
@@ -119,7 +119,7 @@ def render_medical_history_fields(
         f"**{trans['exam']}** *{trans['exam_example']}*",
         placeholder=trans["exam_ph"],
         key="exam",
-        max_chars=250,
+        max_chars=2000,
         help=f":green[**{trans['exam_help']}**]",
     )
 
@@ -128,7 +128,7 @@ def render_medical_history_fields(
         f"**{trans['lab']}** *{trans['lab_example']}*",
         placeholder=trans["lab_ph"],
         key="labresults",
-        max_chars=250,
+        max_chars=2000,
         help=f":green[**{trans['lab_help']}**]",
     )
 
@@ -218,6 +218,41 @@ def render_patient_summary(
     )
 
     return summary
+
+
+def build_patient_from_session(
+    translations: Dict[str, Any], language: str = "English"
+) -> Optional[PatientData]:
+    """
+    Build PatientData from current Streamlit session state (after form widgets rendered).
+
+    Args:
+        translations: Translation dictionary for current language
+        language: Current language key
+
+    Returns:
+        PatientData if valid, None on validation error
+    """
+    trans = translations
+    history = st.session_state.get("context") or None
+    symptoms = st.session_state.get("symptoms") or ""
+    exam = st.session_state.get("exam") or None
+    lab_results = st.session_state.get("labresults") or None
+
+    try:
+        return PatientData(
+            gender=st.session_state.get("gender", trans["male"]),
+            age=int(st.session_state.get("age", 0)),
+            is_pregnant=st.session_state.get("pregnant", trans["no"]),
+            history=history if history else None,
+            symptoms=symptoms,
+            exam_findings=exam if exam else None,
+            lab_results=lab_results if lab_results else None,
+            language=language,
+        )
+    except ValidationError as e:
+        st.error(f"Validation error: {e}")
+        return None
 
 
 def validate_minimum_data(
