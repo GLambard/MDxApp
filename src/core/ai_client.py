@@ -136,17 +136,20 @@ class DiagnosisAIClient:
     def _error_message(exc: Exception) -> str:
         return str(exc)
 
-    @staticmethod
-    def _extract_usage(completion: Any) -> Optional[Dict[str, Any]]:
+    def _extract_usage(self, completion: Any) -> Optional[Dict[str, Any]]:
         """Token usage from an OpenAI completion (includes reasoning tokens when present)."""
         usage = getattr(completion, "usage", None)
         if not usage:
             return None
+        resolved = getattr(completion, "model", None)
         data: Dict[str, Any] = {
             "prompt_tokens": usage.prompt_tokens,
             "completion_tokens": usage.completion_tokens,
             "total_tokens": usage.total_tokens,
-            "model": getattr(completion, "model", None),
+            "requested_model": self.model,
+            "resolved_model": resolved,
+            # Back-compat for UI code that reads "model"
+            "model": resolved,
         }
         details = getattr(usage, "completion_tokens_details", None)
         if details is not None:
@@ -160,7 +163,13 @@ class DiagnosisAIClient:
 
         usage = self._extract_usage(completion)
         if usage and get_settings().log_openai_usage:
-            self.logger.info("OpenAI %s usage: %s", label, usage)
+            self.logger.info(
+                "OpenAI %s usage (requested=%s, resolved=%s): %s",
+                label,
+                usage.get("requested_model"),
+                usage.get("resolved_model"),
+                {k: v for k, v in usage.items() if k not in ("model", "requested_model", "resolved_model")},
+            )
         return usage
 
     @staticmethod

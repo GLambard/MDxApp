@@ -32,7 +32,7 @@ class PatientData(BaseModel):
         age: Patient age in years (0-150)
         is_pregnant: Pregnancy status (only applicable for females)
         history: Environmental/historical context (optional, max 250 chars)
-        symptoms: List of symptoms (required, max 250 chars)
+        symptoms: Patient symptoms (required before submit; may be empty while editing)
         exam_findings: Physical examination findings (optional, max 250 chars)
         lab_results: Laboratory test results (optional, max 250 chars)
         language: Preferred language for diagnosis (default: English)
@@ -42,7 +42,7 @@ class PatientData(BaseModel):
     age: int = Field(..., ge=0, le=150, description="Patient age in years")
     is_pregnant: str = Field(default="no", description="Pregnancy status")
     history: Optional[str] = Field(default=None, max_length=2000, description="Patient history")
-    symptoms: str = Field(..., min_length=1, max_length=2000, description="Patient symptoms")
+    symptoms: str = Field(default="", max_length=2000, description="Patient symptoms")
     exam_findings: Optional[str] = Field(
         default=None, max_length=2000, description="Examination findings"
     )

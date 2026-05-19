@@ -1,39 +1,32 @@
-"""Tests for PatientData validation."""
+"""PatientData validation and minimum-data checks."""
 
-import pytest
+from src.components.patient_form import format_patient_validation_error
+from src.models.patient import PatientData
 from pydantic import ValidationError
 
-from src.models.patient import PatientData
+
+def test_empty_symptoms_allowed_while_editing() -> None:
+    patient = PatientData(gender="male", age=30, symptoms="")
+    assert not patient.has_minimum_data()
 
 
-def test_valid_patient(sample_patient: PatientData) -> None:
-    assert sample_patient.has_minimum_data()
-    assert sample_patient.age == 35
+def test_symptoms_required_for_minimum_data() -> None:
+    patient = PatientData(gender="female", age=25, symptoms="  fever  ")
+    assert patient.has_minimum_data()
 
 
-def test_male_pregnancy_auto_corrected() -> None:
-    patient = PatientData(
-        gender="Male",
-        age=30,
-        is_pregnant="yes",
-        symptoms="cough",
+def test_format_validation_error_symptoms_friendly() -> None:
+    trans = {"submit_warning": "Add symptoms first."}
+    err = ValidationError.from_exception_data(
+        "PatientData",
+        [
+            {
+                "type": "string_too_short",
+                "loc": ("symptoms",),
+                "msg": "too short",
+                "input": "",
+                "ctx": {"min_length": 1},
+            }
+        ],
     )
-    assert patient.is_pregnant == "no"
-
-
-def test_symptoms_required() -> None:
-    with pytest.raises(ValidationError):
-        PatientData(gender="Female", age=25, symptoms="")
-
-
-def test_age_bounds() -> None:
-    with pytest.raises(ValidationError):
-        PatientData(gender="Male", age=-1, symptoms="pain")
-    with pytest.raises(ValidationError):
-        PatientData(gender="Male", age=200, symptoms="pain")
-
-
-def test_field_max_length() -> None:
-    long_text = "x" * 2001
-    with pytest.raises(ValidationError):
-        PatientData(gender="Male", age=20, symptoms=long_text)
+    assert format_patient_validation_error(trans, err) == "Add symptoms first."

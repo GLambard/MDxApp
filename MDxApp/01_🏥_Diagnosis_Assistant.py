@@ -32,7 +32,7 @@ from src.components.patient_form import (
     render_patient_summary,
     validate_minimum_data,
 )
-from src.config.settings import get_settings
+from src.config.settings import get_settings, log_openai_model_config
 from src.services.diagnosis_service import get_diagnosis_service
 from src.utils.locale import apply_rtl_layout
 from src.utils.styling import load_main_styles
@@ -120,6 +120,7 @@ from src.utils.translations_loader import load_app_translations
 transl = load_app_translations()
 
 st.set_page_config(page_title="Diagnosis_Assistant", page_icon="🏥", layout="wide")
+log_openai_model_config()
 load_main_styles(project_root)
 
 lang = render_language_selector(transl, location="sidebar")

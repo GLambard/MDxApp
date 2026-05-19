@@ -3,10 +3,11 @@ Centralized configuration management using Pydantic Settings.
 Manages all application settings, secrets, and environment variables.
 """
 
-from functools import lru_cache
 from typing import List
 
 import streamlit as st
+
+from ..utils.logger import get_logger
 
 
 class Settings:
@@ -19,7 +20,9 @@ class Settings:
         """Initialize settings from Streamlit secrets."""
         # OpenAI Configuration
         self.openai_api_key: str = st.secrets.get("openai_api_key", "")
-        self.openai_model: str = st.secrets.get("openai_api_model", "gpt-5.4-nano")
+        self.openai_model: str = str(
+            st.secrets.get("openai_api_model", "gpt-5.4-nano")
+        )
         # Ignored for gpt-5* models (only default temperature supported)
         self.openai_temperature: float = float(st.secrets.get("openai_api_temp", 1.0))
         # GPT-5: reasoning tokens count toward this limit; use >= 8000 for structured output.
@@ -104,15 +107,35 @@ class Settings:
         return str(env) == "development"
 
 
-@lru_cache
 def get_settings() -> Settings:
     """
-    Get cached settings instance.
-    Uses LRU cache to avoid recreating settings on every call.
+    Load settings from Streamlit secrets (fresh each call).
 
-    Returns:
-        Settings: Cached settings instance
+    Streamlit only reloads secrets.toml on server restart; after editing secrets,
+    stop the app (Ctrl+C) and run ``streamlit run`` again.
     """
     settings = Settings()
     settings.validate()
     return settings
+
+
+def log_openai_model_config() -> None:
+    """Log configured model once per Streamlit session (helps verify secrets.toml)."""
+    import streamlit as st
+    import streamlit.config as st_config
+
+    if st.session_state.get("mdx_openai_model_logged"):
+        return
+    settings = get_settings()
+    logger = get_logger(__name__)
+    try:
+        secret_paths = st_config.get_option("secrets.files")
+        logger.info("Streamlit secrets.toml search order (last wins): %s", secret_paths)
+    except Exception:
+        pass
+    logger.info(
+        "OpenAI model config: secrets[openai_api_model]=%s → using %s",
+        st.secrets.get("openai_api_model", "<unset>"),
+        settings.openai_model,
+    )
+    st.session_state["mdx_openai_model_logged"] = True

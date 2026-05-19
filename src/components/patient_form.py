@@ -11,6 +11,30 @@ from pydantic import ValidationError
 from ..models.patient import PatientData
 
 
+def format_patient_validation_error(
+    translations: Dict[str, Any], error: ValidationError
+) -> str:
+    """Map Pydantic validation errors to localized, user-friendly messages."""
+    for err in error.errors():
+        loc = err.get("loc", ())
+        field = loc[-1] if loc else None
+        err_type = err.get("type", "")
+        if field == "symptoms" and err_type in ("string_too_short", "missing"):
+            return translations.get(
+                "submit_warning",
+                "Please enter at least some symptoms before submission.",
+            )
+        if field == "age":
+            return translations.get(
+                "error_invalid_age",
+                "Please enter a valid age between 0 and 150.",
+            )
+    return translations.get(
+        "error_invalid_patient",
+        "Please check the form and try again.",
+    )
+
+
 def render_patient_demographics(
     translations: Dict[str, Any], language: str = "English"
 ) -> Tuple[str, int, str]:
@@ -184,7 +208,7 @@ def collect_patient_data(
         return patient_data
 
     except ValidationError as e:
-        st.error(f"Validation error: {e}")
+        st.warning(format_patient_validation_error(trans, e))
         return None
 
 
@@ -207,7 +231,11 @@ def render_patient_summary(
 
     # Get display values
     history = patient_data.history if patient_data.history else none_text
-    symptoms = patient_data.symptoms
+    symptoms = (
+        patient_data.symptoms
+        if patient_data.symptoms and patient_data.symptoms.strip()
+        else none_text
+    )
     exam = patient_data.exam_findings if patient_data.exam_findings else none_text
     lab = patient_data.lab_results if patient_data.lab_results else none_text
 
@@ -264,7 +292,7 @@ def build_patient_from_session(
             language=language,
         )
     except ValidationError as e:
-        st.error(f"Validation error: {e}")
+        st.warning(format_patient_validation_error(trans, e))
         return None
 
 
@@ -282,17 +310,21 @@ def validate_minimum_data(
         bool: True if valid, False otherwise (displays error)
     """
     if patient_data is None:
-        st.error(translations.get("error_invalid_patient", "Patient data is invalid"))
+        st.warning(
+            translations.get(
+                "error_invalid_patient",
+                "Please check the form and try again.",
+            )
+        )
         return False
 
     if not patient_data.has_minimum_data():
-        none_text = translations.get("none", "none")
-        if patient_data.symptoms == none_text or not patient_data.symptoms.strip():
-            st.write(
-                f'<p style="font-weight: bold; font-size:18px;">'
-                f"{translations['submit_warning']}</p>",
-                unsafe_allow_html=True,
+        st.warning(
+            translations.get(
+                "submit_warning",
+                "Please enter at least some symptoms before submission.",
             )
-            return False
+        )
+        return False
 
     return True

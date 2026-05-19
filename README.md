@@ -25,6 +25,8 @@ chronic condition(s) followed by indications on any existing treatment(s).
 
 **Streamlit Cloud:** paste the same keys in your app **Settings → Secrets** (see the example file for the full template).
 
+**Two `secrets.toml` files?** When you run `streamlit run "MDxApp/01_🏥_Diagnosis_Assistant.py"`, Streamlit also loads `MDxApp/.streamlit/secrets.toml` *after* the project-root file. Any `openai_api_model` in the inner file overrides the root. Keep API settings only in **`.streamlit/secrets.toml`** at the repo root; use `MDxApp/.streamlit/secrets.toml` for theme only.
+
 Run locally:
 
 ```bash
