@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional
 
 import streamlit as st
 
+from ..config.settings import get_settings
 from ..core.ai_client import StructuredDiagnosisOutput
 
 _DEFAULT_LABELS = {
@@ -23,6 +24,7 @@ _DEFAULT_LABELS = {
     "dx_icd10": "ICD-10",
     "dx_references": "References",
     "dx_evidence_disclaimer": "References are for education only; verify with a clinician.",
+    "dx_evidence_none": "No verifiable references were provided for this case.",
     "dx_imaging": "Imaging findings",
     "dx_drug_alerts": "Medication alerts",
     "dx_download_pdf": "Download PDF report",
@@ -119,7 +121,7 @@ def render_structured_diagnosis(
     st.markdown(f"**{diagnosis.primary_diagnosis}**")
     st.markdown(_confidence_badge_html(trans, diagnosis.confidence_level), unsafe_allow_html=True)
 
-    if diagnosis.icd10_primary:
+    if get_settings().enable_icd10_codes and diagnosis.icd10_primary:
         st.markdown(f"**{_label(trans, 'dx_icd10')}:** {diagnosis.icd10_primary}")
         for code in diagnosis.icd10_differentials:
             st.markdown(f"- {_esc(code)}")
@@ -166,18 +168,30 @@ def render_structured_diagnosis(
         if diagnosis.medication_notes:
             st.caption(diagnosis.medication_notes)
 
-    if diagnosis.evidence_items:
+    if get_settings().enable_evidence_fields:
         ref_label = f"📚 {_label(trans, 'dx_references')}"
         with st.expander(ref_label, expanded=False):
             st.caption(_label(trans, "dx_evidence_disclaimer"))
-            for ev in diagnosis.evidence_items:
-                if ev.pmid:
-                    url = f"https://pubmed.ncbi.nlm.nih.gov/{ev.pmid}/"
-                    st.markdown(f"- [{ev.title}]({url}) — {ev.source}")
-                elif ev.url:
-                    st.markdown(f"- [{ev.title}]({ev.url}) — {ev.source}")
-                else:
-                    st.markdown(f"- {ev.title} ({ev.source})")
+            if diagnosis.evidence_items:
+                from ..services.evidence_utils import resolve_evidence_link
+
+                for ev in diagnosis.evidence_items:
+                    link = resolve_evidence_link(ev)
+                    if link:
+                        safe_href = html_lib.escape(link, quote=True)
+                        st.markdown(
+                            f'<p class="mdx-evidence-item">• <a href="{safe_href}" '
+                            f'target="_blank" rel="noopener noreferrer">{_esc(ev.title)}</a>'
+                            f" — {_esc(ev.source)}</p>",
+                            unsafe_allow_html=True,
+                        )
+                    else:
+                        st.markdown(
+                            f'<p class="mdx-evidence-item">• {_esc(ev.title)} ({_esc(ev.source)})</p>',
+                            unsafe_allow_html=True,
+                        )
+            else:
+                st.caption(_label(trans, "dx_evidence_none"))
 
     reasoning_label = f"💡 {_label(trans, 'dx_reasoning')}"
     with st.expander(reasoning_label, expanded=False):
@@ -246,16 +260,23 @@ def render_pdf_download_button(
         return
 
     try:
-        pdf_bytes = build_pdf_bytes(
-            patient=patient,
-            translations=translations,
-            structured=structured,
-            plain_html=plain_html,
-            logo_path=logo_path,
+        # Cache PDF in user-owned session keys (not the download_button widget key).
+        cache_meta = (
+            structured.model_dump_json() if structured is not None else (plain_html or "")
         )
+        if st.session_state.get("mdx_pdf_cache_meta") != cache_meta:
+            st.session_state["mdx_pdf_cache_meta"] = cache_meta
+            st.session_state["mdx_pdf_bytes"] = build_pdf_bytes(
+                patient=patient,
+                translations=translations,
+                structured=structured,
+                plain_html=plain_html,
+                logo_path=logo_path,
+            )
+
         st.download_button(
             label=_label(translations, "dx_download_pdf"),
-            data=pdf_bytes,
+            data=st.session_state["mdx_pdf_bytes"],
             file_name=build_pdf_filename(),
             mime="application/pdf",
             key="mdx_pdf_download",

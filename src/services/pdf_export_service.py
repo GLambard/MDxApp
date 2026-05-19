@@ -15,6 +15,7 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer
 
+from ..config.settings import get_settings
 from ..core.ai_client import StructuredDiagnosisOutput
 from ..models.patient import PatientData
 
@@ -193,7 +194,7 @@ def _append_structured_sections(
         )
     )
 
-    if diagnosis.icd10_primary:
+    if get_settings().enable_icd10_codes and diagnosis.icd10_primary:
         story.append(
             Paragraph(
                 _safe_text(f"{_label(translations, 'dx_icd10')}: {diagnosis.icd10_primary}"),
@@ -222,15 +223,17 @@ def _append_structured_sections(
         for alert in diagnosis.drug_interactions:
             story.append(Paragraph(_safe_text(f"• {alert}"), body_style))
 
-    if diagnosis.evidence_items:
+    if get_settings().enable_evidence_fields:
+        from .evidence_utils import resolve_evidence_link
+
         story.append(Paragraph(_safe_text(_label(translations, "dx_references")), heading_style))
-        for ev in diagnosis.evidence_items:
-            line = f"{ev.title} ({ev.source})"
-            if ev.pmid:
-                line += f" — https://pubmed.ncbi.nlm.nih.gov/{ev.pmid}/"
-            elif ev.url:
-                line += f" — {ev.url}"
-            story.append(Paragraph(_safe_text(line), body_style))
+        if diagnosis.evidence_items:
+            for ev in diagnosis.evidence_items:
+                line = f"{ev.title} ({ev.source})"
+                link = resolve_evidence_link(ev)
+                if link:
+                    line += f" — {link}"
+                story.append(Paragraph(_safe_text(line), body_style))
         story.append(
             Paragraph(_safe_text(_label(translations, "dx_evidence_disclaimer")), body_style)
         )

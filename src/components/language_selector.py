@@ -133,16 +133,13 @@ def render_language_selector_with_header(
     # Optional header
     if show_header:
         header_text = translations[current_lang].get("language_selection", "Select a language:")
+        header_html = (
+            f'<p class="mdx-donation-title mdx-donation-center">{header_text}</p>'
+        )
         if location == "sidebar":
-            st.sidebar.markdown(
-                f"<h3 style='text-align: center; color: black;'>{header_text}</h3>",
-                unsafe_allow_html=True,
-            )
+            st.sidebar.markdown(header_html, unsafe_allow_html=True)
         else:
-            st.markdown(
-                f"<h3 style='text-align: center; color: black;'>{header_text}</h3>",
-                unsafe_allow_html=True,
-            )
+            st.markdown(header_html, unsafe_allow_html=True)
 
     # Render selector
     return render_language_selector(translations, location)

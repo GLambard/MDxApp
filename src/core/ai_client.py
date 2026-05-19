@@ -5,7 +5,7 @@ Optimized for GPT-5 Mini with structured outputs and latest best practices.
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Callable, Dict, Literal, Optional
 
 import openai
 from openai import OpenAI
@@ -14,6 +14,10 @@ from pydantic import BaseModel, Field
 from ..utils.logger import get_logger
 
 DEFAULT_TIMEOUT_SECONDS = 120.0
+# GPT-5 models bill reasoning tokens against max_completion_tokens; 2000 is often all reasoning.
+GPT5_MIN_COMPLETION_TOKENS = 8_000
+GPT5_STRUCTURED_MIN_COMPLETION_TOKENS = 8_000
+GPT5_MAX_COMPLETION_CAP = 32_000
 
 
 @dataclass
@@ -24,6 +28,7 @@ class DiagnosisAPIResult:
     content: Optional[str] = None
     structured: Optional["StructuredDiagnosisOutput"] = None
     error_message: Optional[str] = None
+    usage: Optional[Dict[str, Any]] = None
 
 
 class EvidenceItem(BaseModel):
@@ -116,8 +121,12 @@ class DiagnosisAIClient:
         self.logger = get_logger(__name__)
 
         if self.is_gpt5_mini:
+            self.max_completion_tokens = self._resolve_max_completion_tokens(
+                self.max_completion_tokens, structured=True
+            )
             self.logger.info(
-                "Initialized DiagnosisAIClient with GPT-5 Mini (temperature=1.0 default only)"
+                "Initialized DiagnosisAIClient with GPT-5 Mini (max_completion_tokens=%s)",
+                self.max_completion_tokens,
             )
         else:
             self.logger.info("Initialized DiagnosisAIClient with model: %s", model)
@@ -125,6 +134,130 @@ class DiagnosisAIClient:
     @staticmethod
     def _error_message(exc: Exception) -> str:
         return str(exc)
+
+    @staticmethod
+    def _extract_usage(completion: Any) -> Optional[Dict[str, Any]]:
+        """Token usage from an OpenAI completion (includes reasoning tokens when present)."""
+        usage = getattr(completion, "usage", None)
+        if not usage:
+            return None
+        data: Dict[str, Any] = {
+            "prompt_tokens": usage.prompt_tokens,
+            "completion_tokens": usage.completion_tokens,
+            "total_tokens": usage.total_tokens,
+            "model": getattr(completion, "model", None),
+        }
+        details = getattr(usage, "completion_tokens_details", None)
+        if details is not None:
+            reasoning = getattr(details, "reasoning_tokens", None)
+            if reasoning is not None:
+                data["reasoning_tokens"] = reasoning
+        return data
+
+    def _log_usage(self, completion: Any, label: str) -> Optional[Dict[str, Any]]:
+        from ..config.settings import get_settings
+
+        usage = self._extract_usage(completion)
+        if usage and get_settings().log_openai_usage:
+            self.logger.info("OpenAI %s usage: %s", label, usage)
+        return usage
+
+    @staticmethod
+    def _is_length_limit_error(exc: Exception) -> bool:
+        msg = str(exc).lower()
+        return "length limit was reached" in msg or "length limit" in msg
+
+    def _resolve_max_completion_tokens(
+        self, max_completion_tokens: int, *, structured: bool = False
+    ) -> int:
+        """Raise completion budget for GPT-5 so reasoning tokens leave room for output."""
+        if not self.is_gpt5_mini:
+            return max_completion_tokens
+        floor = (
+            GPT5_STRUCTURED_MIN_COMPLETION_TOKENS
+            if structured
+            else GPT5_MIN_COMPLETION_TOKENS
+        )
+        if max_completion_tokens < floor:
+            self.logger.warning(
+                "GPT-5 %s call: raising max_completion_tokens from %s to %s",
+                "structured" if structured else "plain",
+                max_completion_tokens,
+                floor,
+            )
+            return floor
+        return max_completion_tokens
+
+    def _structured_completion_limits(self, max_completion_tokens: int) -> list[int]:
+        """Token limits to try; second attempt helps when reasoning consumes the first budget."""
+        resolved = self._resolve_max_completion_tokens(
+            max_completion_tokens, structured=True
+        )
+        if not self.is_gpt5_mini:
+            return [resolved]
+        retry = min(resolved * 2, GPT5_MAX_COMPLETION_CAP)
+        return [resolved] if retry <= resolved else [resolved, retry]
+
+    def _run_structured_parse(
+        self,
+        build_params: Callable[[int], Dict[str, Any]],
+        max_completion_tokens: int,
+        *,
+        log_label: str = "structured",
+        temperature: Optional[float] = None,
+    ) -> DiagnosisAPIResult:
+        """Parse structured output with GPT-5-safe limits and one retry on length exhaustion."""
+        limits = self._structured_completion_limits(max_completion_tokens)
+        last_error: Optional[Exception] = None
+
+        for attempt_idx, limit in enumerate(limits):
+            try:
+                if attempt_idx > 0:
+                    self.logger.warning(
+                        "%s diagnosis hit token limit; retrying with max_completion_tokens=%s",
+                        log_label.capitalize(),
+                        limit,
+                    )
+                params = build_params(limit)
+                params["response_format"] = StructuredDiagnosisOutput
+                if not self.is_gpt5_mini and temperature is not None:
+                    params["temperature"] = temperature
+
+                completion = self.client.beta.chat.completions.parse(**params)
+                usage = self._log_usage(completion, log_label)
+                diagnosis_output = completion.choices[0].message.parsed
+                if diagnosis_output:
+                    self.logger.info("Successfully received %s diagnosis", log_label)
+                    return DiagnosisAPIResult(
+                        success=True, structured=diagnosis_output, usage=usage
+                    )
+
+                return DiagnosisAPIResult(
+                    success=False, error_message="Structured parse returned no data."
+                )
+
+            except openai.AuthenticationError as e:
+                self.logger.error("OpenAI authentication error: %s", e)
+                return DiagnosisAPIResult(success=False, error_message=self._error_message(e))
+            except openai.RateLimitError as e:
+                self.logger.error("OpenAI rate limit exceeded: %s", e)
+                return DiagnosisAPIResult(success=False, error_message=self._error_message(e))
+            except openai.APIConnectionError as e:
+                self.logger.error("OpenAI API connection error: %s", e)
+                return DiagnosisAPIResult(success=False, error_message=self._error_message(e))
+            except openai.APIError as e:
+                self.logger.error("OpenAI API error: %s", e)
+                return DiagnosisAPIResult(success=False, error_message=self._error_message(e))
+            except Exception as e:
+                last_error = e
+                if attempt_idx < len(limits) - 1 and self._is_length_limit_error(e):
+                    continue
+                self.logger.error("Unexpected error during %s diagnosis: %s", log_label, e)
+                return DiagnosisAPIResult(success=False, error_message=self._error_message(e))
+
+        if last_error:
+            return DiagnosisAPIResult(success=False, error_message=self._error_message(last_error))
+        return DiagnosisAPIResult(success=False, error_message="Structured parse failed.")
 
     def _build_chat_params(
         self, system_prompt: str, user_prompt: str, max_completion_tokens: int, **kwargs: Any
@@ -157,7 +290,10 @@ class DiagnosisAIClient:
         Returns:
             DiagnosisAPIResult with content or error_message
         """
-        max_completion_tokens = kwargs.get("max_completion_tokens", self.max_completion_tokens)
+        max_completion_tokens = self._resolve_max_completion_tokens(
+            kwargs.get("max_completion_tokens", self.max_completion_tokens),
+            structured=False,
+        )
 
         try:
             self.logger.info("Requesting diagnosis from OpenAI API")
@@ -165,12 +301,13 @@ class DiagnosisAIClient:
                 system_prompt, user_prompt, max_completion_tokens, **kwargs
             )
             response = self.client.chat.completions.create(**params)
+            usage = self._log_usage(response, "plain")
             diagnosis = response.choices[0].message.content
 
             if diagnosis:
                 cleaned = diagnosis.replace("<|im_end|>", "").strip()
                 self.logger.info("Successfully received diagnosis from OpenAI API")
-                return DiagnosisAPIResult(success=True, content=str(cleaned))
+                return DiagnosisAPIResult(success=True, content=str(cleaned), usage=usage)
 
             return DiagnosisAPIResult(
                 success=False, error_message="OpenAI returned an empty response."
@@ -234,43 +371,17 @@ class DiagnosisAIClient:
         Get structured medical diagnosis using GPT-5 Mini with Pydantic output.
         """
         max_completion_tokens = kwargs.get("max_completion_tokens", self.max_completion_tokens)
+        self.logger.info("Requesting structured diagnosis from OpenAI API")
+        temperature = kwargs.get("temperature", self.temperature) if not self.is_gpt5_mini else None
 
-        try:
-            self.logger.info("Requesting structured diagnosis from OpenAI API")
-            params = self._build_chat_params(
-                system_prompt, user_prompt, max_completion_tokens, **kwargs
-            )
-            params["response_format"] = StructuredDiagnosisOutput
-
-            if not self.is_gpt5_mini and self.temperature is not None:
-                params["temperature"] = kwargs.get("temperature", self.temperature)
-
-            completion = self.client.beta.chat.completions.parse(**params)
-            diagnosis_output = completion.choices[0].message.parsed
-
-            if diagnosis_output:
-                self.logger.info("Successfully received structured diagnosis")
-                return DiagnosisAPIResult(success=True, structured=diagnosis_output)
-
-            return DiagnosisAPIResult(
-                success=False, error_message="Structured parse returned no data."
-            )
-
-        except openai.AuthenticationError as e:
-            self.logger.error("OpenAI authentication error: %s", e)
-            return DiagnosisAPIResult(success=False, error_message=self._error_message(e))
-        except openai.RateLimitError as e:
-            self.logger.error("OpenAI rate limit exceeded: %s", e)
-            return DiagnosisAPIResult(success=False, error_message=self._error_message(e))
-        except openai.APIConnectionError as e:
-            self.logger.error("OpenAI API connection error: %s", e)
-            return DiagnosisAPIResult(success=False, error_message=self._error_message(e))
-        except openai.APIError as e:
-            self.logger.error("OpenAI API error: %s", e)
-            return DiagnosisAPIResult(success=False, error_message=self._error_message(e))
-        except Exception as e:
-            self.logger.error("Unexpected error during structured diagnosis: %s", e)
-            return DiagnosisAPIResult(success=False, error_message=self._error_message(e))
+        return self._run_structured_parse(
+            lambda limit: self._build_chat_params(
+                system_prompt, user_prompt, limit, **kwargs
+            ),
+            max_completion_tokens,
+            log_label="structured",
+            temperature=temperature,
+        )
 
     def get_structured_diagnosis_with_image(
         self,
@@ -283,10 +394,10 @@ class DiagnosisAIClient:
         """Structured diagnosis with one vision image (GPT-5 Mini multimodal)."""
         max_completion_tokens = kwargs.get("max_completion_tokens", self.max_completion_tokens)
         data_url = f"data:{mime_type};base64,{image_base64}"
+        self.logger.info("Requesting multimodal structured diagnosis")
 
-        try:
-            self.logger.info("Requesting multimodal structured diagnosis")
-            params: Dict[str, Any] = {
+        def build_multimodal_params(limit: int) -> Dict[str, Any]:
+            return {
                 "model": self.model,
                 "messages": [
                     {"role": "system", "content": system_prompt},
@@ -298,19 +409,14 @@ class DiagnosisAIClient:
                         ],
                     },
                 ],
-                "response_format": StructuredDiagnosisOutput,
-                "max_completion_tokens": max_completion_tokens,
+                "max_completion_tokens": limit,
             }
-            completion = self.client.beta.chat.completions.parse(**params)
-            diagnosis_output = completion.choices[0].message.parsed
-            if diagnosis_output:
-                return DiagnosisAPIResult(success=True, structured=diagnosis_output)
-            return DiagnosisAPIResult(
-                success=False, error_message="Multimodal structured parse returned no data."
-            )
-        except Exception as e:
-            self.logger.error("Multimodal diagnosis error: %s", e)
-            return DiagnosisAPIResult(success=False, error_message=self._error_message(e))
+
+        return self._run_structured_parse(
+            build_multimodal_params,
+            max_completion_tokens,
+            log_label="multimodal structured",
+        )
 
     def format_structured_diagnosis(
         self,

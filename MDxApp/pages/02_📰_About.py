@@ -5,26 +5,19 @@ from pathlib import Path
 import streamlit as st
 from streamlit.components.v1 import html
 
-# Add src directory to path for imports
 path = os.path.dirname(__file__)
 project_root = Path(path).parent.parent
 sys.path.insert(0, str(project_root))
 
-# Import new components and utilities
 from src.components.donation import get_default_qr_path, render_sidebar_donation
+from src.config.settings import get_settings
 from src.utils.styling import load_main_styles
 
-# Trick to preserve the state of your widgets across pages
-for k, v in st.session_state.items():
-    st.session_state[k] = v
-
 st.set_page_config(page_title="About", page_icon="📰", layout="wide")
-
-# Load external CSS styles
 load_main_styles(project_root)
 
-# Buy me a coffee - MDxApp support (using component)
-# Using English translations for About page (hardcoded for simplicity)
+settings = get_settings()
+
 translations_en = {
     "English": {
         "bmc_0": "Let's keep MDxApp free!",
@@ -41,64 +34,72 @@ with st.sidebar:
         qr_image_path=get_default_qr_path(project_root),
     )
 
-st.header("About")
+st.header("About MDxApp")
 
 st.markdown(
-    """
-    ### **Brief description of the web app**
-    This app is designed to assist medical doctors and provide patients with a
-    fast diagnostic supported by the ChatGPT AI model of [OpenAI](https://openai.com/) based on relevant information such as age,
-    gender, pregnancy state, environmental and historical context, symptoms, observations, and test results conducted in laboratory.
-    ### **Why should you buy me a coffee, i.e. donate ?**
-    This app uses the ChatGPT AI model through the official API of OpenAI which has a cost. Also, this app is free to use and will
-    remain free to use for all if you support it by buying me a coffee (see the dedicated button and QR code on the left side).
-    Thank you very much in advance for making it possible !
-    ### Coming features
-    - Differential diagnosis :clipboard:
-    - Multilingual interface 🇨🇳 🇧🇷 🇮🇩 🇷🇺
-    ### Versions
-    :sparkles: **Current version: V1.123** (2023/03/29) :sparkles:
-    - Updates: Rolling out Spanish and German translations of the UI, bug fixes.
+    f"""
+### What is MDxApp?
 
-    Version history:
-    - v1.121 (2023/03/28): Updates: Rolling out French and Japanese translations of the UI, bug fixes.
-    - v1.11 (2023/03/07): Updates: **Highlight** in HTML format the **proposed diagnostic**, **caution message** added, bug fixes.
-    - v1.10 (2023/03/02): Updates: **model gpt-3.5-turbo (ChatGPT) integration**, bug fixes, and performance improvements.
-    - v1.01 (2023/01/30): Internal pre-release
-    ### **Sources**
-    - The source code of this app is available [here](https://github.com/GLambard/MDxApp)
-    - Anonymous public cases taken from the Brown Hospital Medicine Twitter account [@BrownJHM](https://twitter.com/BrownJHM)
-    are used as illustrating examples on the main page of the app.
-    ### :rotating_light: **Caution message** :rotating_light:
-    Please be aware that while the app is designed to assist medical decision-making and check symptoms,
-    the final diagnosis should be made by a licensed medical professional. We recommend
-    seeking additional evaluations and opinions before making any treatment decisions.
-    ### **Message from the developer**
-    > Dear community,
-    >
-    > I am proud to announce the deployment of this free app that provides medical diagnosis assistance to those in need.
-    >
-    > I want to take this moment to thank the open-source community for their unwavering support in making this project a reality.
-    > Your contributions, in any form, have allowed me to bring this tool to all.
-    >
-    > I hope this app will positively impact people's lives, and I am grateful for the opportunity to serve the community in this way.
-    >
-    > Thank you for your continued support.
-    >
-    > Best,
-    >
-    > Guillaume Lambard
-    > AI solutions designer and developer
-    > *(who developed this tool in his spare time)*
-    >
-    >
-    """,
-    unsafe_allow_html=True,
+MDxApp is a **free medical diagnosis assistant** that helps clinicians, students, and patients
+organize symptoms and receive an **AI-assisted preliminary assessment**. It runs on
+[OpenAI](https://openai.com/) **{settings.openai_model}** with structured outputs for clear,
+actionable results.
+
+### Current features (v{settings.app_version})
+
+- **Structured diagnosis** — primary diagnosis, differentials, next steps, considerations, confidence, clinical reasoning
+- **PDF report download** — shareable summary after each assessment
+- **Educational references** — optional literature links when the model provides verifiable PMIDs or URLs
+- **Medication safety notes** — interaction warnings when medications are listed (OpenFDA + AI)
+- **10 languages** — English, Français, 日本語, Español, Deutsch, 中文, Português, हिन्दी, العربية, Русский
+- **Privacy-first** — no patient data stored on our servers; each session is ephemeral
+
+### Not included (by design)
+
+- **Medical imaging upload** — disabled while we validate safety and accuracy (can be enabled later via configuration)
+- **Regional billing codes (ICD-10, etc.)** — hidden because coding systems differ by country
+- **Final diagnosis** — always requires a licensed clinician; this tool is educational and assistive only
+
+### Support the project
+
+The app uses the OpenAI API, which has a real cost per request. Donations via **Buy Me a Coffee**
+(see the sidebar) help keep MDxApp free for everyone. Thank you for your support.
+
+### Version history
+
+| Version | Date | Highlights |
+|---------|------|------------|
+| **2.5.0** | 2026 | Phase 2: PDF export, references, 10 languages, drug checks, GPT-5 Mini, modular `src/` architecture |
+| **2.0.0** | 2025 | Modernized codebase, structured outputs, tests, external CSS |
+| **1.12x** | 2023 | Multilingual UI expansion, ChatGPT integration |
+| **1.0** | 2023 | Initial public release |
+
+### Sources
+
+- Source code: [github.com/GLambard/MDxApp](https://github.com/GLambard/MDxApp)
+- Example cases on the main page are adapted from public teaching material (e.g. [@BrownJHM](https://twitter.com/BrownJHM)).
+
+### :rotating_light: Caution :rotating_light:
+
+This app supports medical decision-making; it does **not** replace evaluation by a licensed
+professional. Seek urgent care for emergencies. Verify all suggestions before treatment decisions.
+
+### Message from the developer
+
+> Dear community,
+>
+> Thank you for using MDxApp. This project is built in spare time to make diagnostic thinking
+> more accessible worldwide. Your feedback and coffee support keep it running.
+>
+> — **Guillaume Lambard**  
+> AI solutions designer and developer
+"""
 )
 
 html(
     """
-    <a class="github-button" href="https://github.com/GLambard/MDxApp" data-show-count="true" aria-label="Follow @GLambard on GitHub">Follow @GLambard</a>
+    <a class="github-button" href="https://github.com/GLambard/MDxApp" data-show-count="true"
+       aria-label="Follow @GLambard on GitHub">Follow @GLambard</a>
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <a class="twitter-follow-button" href="https://twitter.com/gamlambard">Follow @gamlambard</a>
     <script async defer src="https://platform.twitter.com/widgets.js"></script>

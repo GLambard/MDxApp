@@ -12,10 +12,6 @@ sys.path.insert(0, str(project_root))
 # Import new utilities
 from src.utils.styling import load_main_styles
 
-# Trick to preserve the state of your widgets across pages
-for k, v in st.session_state.items():
-    st.session_state[k] = v
-
 st.set_page_config(
     page_title="Contact",
     page_icon="✉️",

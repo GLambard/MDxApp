@@ -148,6 +148,57 @@ p.mdx-drug-alert {
 }
 
 /* ============================================
+   Donation section (sidebar + inline)
+   ============================================ */
+
+.mdx-donation-title,
+.mdx-donation-text {
+    color: #262730;
+    font-weight: 600;
+    margin: 0.35rem 0;
+}
+
+.mdx-donation-title {
+    font-size: 1.25rem;
+}
+
+.mdx-donation-text {
+    font-size: 1.05rem;
+}
+
+.mdx-donation-center {
+    text-align: center;
+}
+
+[data-theme="dark"] .mdx-donation-title,
+[data-theme="dark"] .mdx-donation-text {
+    color: #fafafa;
+}
+
+.mdx-evidence-item {
+    color: #262730;
+    margin: 0.25rem 0;
+    font-size: 0.95rem;
+}
+
+.mdx-evidence-item a {
+    color: #0068c9;
+    text-decoration: none;
+}
+
+.mdx-evidence-item a:hover {
+    text-decoration: underline;
+}
+
+[data-theme="dark"] .mdx-evidence-item {
+    color: #fafafa;
+}
+
+[data-theme="dark"] .mdx-evidence-item a {
+    color: #7bb6ff;
+}
+
+/* ============================================
    Responsive Design (Future Enhancement)
    ============================================ */
 

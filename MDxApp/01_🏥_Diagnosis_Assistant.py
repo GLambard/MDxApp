@@ -37,13 +37,87 @@ from src.config.settings import get_settings
 from src.services.diagnosis_service import get_diagnosis_service
 from src.utils.styling import load_main_styles
 
+
+def _persist_diagnosis_result(result) -> None:
+    """Store diagnosis in session and reset PDF cache for a fresh download widget."""
+    st.session_state.diagnostic = result.html_content
+    st.session_state.diagnostic_structured = (
+        result.structured.model_dump() if result.structured else None
+    )
+    st.session_state.diagnostic_fallback = result.used_plain_fallback
+    if result.metadata and result.metadata.get("usage"):
+        st.session_state.last_api_usage = result.metadata["usage"]
+    for _pdf_key in ("mdx_pdf_download", "mdx_pdf_bytes", "mdx_pdf_cache_meta"):
+        st.session_state.pop(_pdf_key, None)
+
+
+def _render_api_usage_sidebar() -> None:
+    """Optional token usage caption for cost monitoring (development / ops)."""
+    settings = get_settings()
+    if not settings.show_usage_in_ui:
+        return
+    usage = st.session_state.get("last_api_usage")
+    if not usage:
+        return
+    total = usage.get("total_tokens", "?")
+    reasoning = usage.get("reasoning_tokens")
+    line = f"API usage (last run): {total} tokens"
+    if reasoning is not None:
+        line += f" ({reasoning} reasoning)"
+    st.sidebar.caption(line)
+
+
+def _render_diagnosis_footer(lang: str, transl: dict, project_root: Path) -> None:
+    """Caution and donation blocks shown after every successful diagnosis view."""
+    st.markdown(
+        f"### :rotating_light: **{transl[lang]['caution']}** :rotating_light:\n"
+        f"{transl[lang]['caution_message']}",
+        unsafe_allow_html=True,
+    )
+    render_inline_donation(
+        username="geonosislaX",
+        translations=transl,
+        language=lang,
+        qr_image_path=get_default_qr_path(project_root),
+        show_separator=True,
+        invest_message=True,
+    )
+
+
+def _render_stored_diagnosis(
+    patient_data,
+    lang: str,
+    transl: dict,
+    project_root: Path,
+) -> bool:
+    """Render diagnosis, PDF button, and footer from session (survives widget reruns)."""
+    if "diagnostic" not in st.session_state:
+        return False
+
+    structured = structured_from_session(st.session_state.get("diagnostic_structured"))
+    html = st.session_state.diagnostic.replace("<|im_end|>", "")
+    st.write("")
+    render_diagnosis_result(
+        html_content=html,
+        structured=structured,
+        translations=transl[lang],
+        used_plain_fallback=st.session_state.get("diagnostic_fallback", False),
+    )
+    if patient_data:
+        render_pdf_download_button(
+            patient=patient_data,
+            translations=transl[lang],
+            structured=structured,
+            plain_html=html,
+            logo_path=project_root / "Materials" / "MDxApp_logo_v2_256.png",
+        )
+    _render_diagnosis_footer(lang, transl, project_root)
+    return True
+
+
 # Load translations
 with open(path + "/../Assets/translations.json", encoding="utf-8") as f:
     transl = json.load(f)
-
-# Preserve widget state across pages
-for k, v in st.session_state.items():
-    st.session_state[k] = v
 
 st.set_page_config(page_title="Diagnosis_Assistant", page_icon="🏥", layout="wide")
 load_main_styles(project_root)
@@ -58,6 +132,7 @@ with st.sidebar:
         language=lang,
         qr_image_path=get_default_qr_path(project_root),
     )
+    _render_api_usage_sidebar()
 
 logo_name = path + "/../Materials/MDxApp_logo_v2_256.png"
 t1, t2 = st.columns([1, 3], gap="large")
@@ -122,25 +197,7 @@ if submit_button:
                 )
 
                 if result.success and result.html_content:
-                    st.session_state.diagnostic = result.html_content
-                    st.session_state.diagnostic_structured = (
-                        result.structured.model_dump() if result.structured else None
-                    )
-                    st.session_state.diagnostic_fallback = result.used_plain_fallback
-                    st.write("")
-                    render_diagnosis_result(
-                        html_content=result.html_content,
-                        structured=result.structured,
-                        translations=transl[lang],
-                        used_plain_fallback=result.used_plain_fallback,
-                    )
-                    render_pdf_download_button(
-                        patient=patient_data,
-                        translations=transl[lang],
-                        structured=result.structured,
-                        plain_html=result.html_content,
-                        logo_path=project_root / "Materials" / "MDxApp_logo_v2_256.png",
-                    )
+                    _persist_diagnosis_result(result)
                 elif result.error_message:
                     st.error(f"OpenAI API Error: {result.error_message}")
                     st.write(
@@ -152,45 +209,17 @@ if submit_button:
                         f'<p style="font-weight: bold; font-size:18px;">{transl[lang]["no_response"]}</p>',
                         unsafe_allow_html=True,
                     )
-
-                st.markdown(
-                    f"### :rotating_light: **{transl[lang]['caution']}** :rotating_light:\n"
-                    f"{transl[lang]['caution_message']}",
-                    unsafe_allow_html=True,
-                )
-                render_inline_donation(
-                    username="geonosislaX",
-                    translations=transl,
-                    language=lang,
-                    qr_image_path=get_default_qr_path(project_root),
-                    show_separator=True,
-                    invest_message=True,
-                )
             except Exception as exc:
                 st.error(f"OpenAI API Error: {exc}")
                 st.write(
                     f'<p style="font-weight: bold; font-size:18px;">{transl[lang]["no_response"]}</p>',
                     unsafe_allow_html=True,
                 )
+
+        if not _render_stored_diagnosis(patient_data, lang, transl, project_root):
+            _render_diagnosis_footer(lang, transl, project_root)
 else:
-    if "diagnostic" in st.session_state:
-        structured = structured_from_session(st.session_state.get("diagnostic_structured"))
-        html = st.session_state.diagnostic.replace("<|im_end|>", "")
-        render_diagnosis_result(
-            html_content=html,
-            structured=structured,
-            translations=transl[lang],
-            used_plain_fallback=st.session_state.get("diagnostic_fallback", False),
-        )
-        if patient_data:
-            render_pdf_download_button(
-                patient=patient_data,
-                translations=transl[lang],
-                structured=structured,
-                plain_html=html,
-                logo_path=project_root / "Materials" / "MDxApp_logo_v2_256.png",
-            )
-    else:
+    if not _render_stored_diagnosis(patient_data, lang, transl, project_root):
         st.write(
             f'<p style="font-weight: bold; font-size:18px;">{transl[lang]["no_diagnostic"]}</p>',
             unsafe_allow_html=True,

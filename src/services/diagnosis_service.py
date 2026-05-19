@@ -62,7 +62,9 @@ class DiagnosisService:
                     api_key=self.settings.openai_api_key,
                     model=self.settings.openai_model,
                     temperature=self.settings.openai_temperature,
-                    max_tokens=self.settings.openai_max_tokens,
+                    max_tokens=self.settings.effective_max_completion_tokens(
+                        structured=True
+                    ),
                     frequency_penalty=self.settings.openai_frequency_penalty,
                     presence_penalty=self.settings.openai_presence_penalty,
                     timeout_seconds=self.settings.openai_timeout_seconds,
@@ -72,7 +74,9 @@ class DiagnosisService:
                     api_key=self.settings.openai_api_key,
                     model=self.settings.openai_model,
                     temperature=self.settings.openai_temperature,
-                    max_tokens=self.settings.openai_max_tokens,
+                    max_tokens=self.settings.effective_max_completion_tokens(
+                        structured=True
+                    ),
                     frequency_penalty=self.settings.openai_frequency_penalty,
                     presence_penalty=self.settings.openai_presence_penalty,
                 )
@@ -201,6 +205,7 @@ class DiagnosisService:
                         is_structured=True,
                         structured=structured,
                         used_plain_fallback=False,
+                        metadata={"usage": api_result.usage} if api_result.usage else None,
                     )
                 if api_result.error_message:
                     used_fallback = True
@@ -218,6 +223,7 @@ class DiagnosisService:
                     html_content=cleaned,
                     is_structured=False,
                     used_plain_fallback=used_fallback,
+                    metadata={"usage": plain_result.usage} if plain_result.usage else None,
                 )
             return DiagnosisResult(
                 success=False,

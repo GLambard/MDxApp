@@ -10,6 +10,17 @@ import streamlit as st
 from streamlit.components.v1 import html
 
 
+def _render_donation_text(text: str, *, variant: str = "text", center: bool = False) -> None:
+    """Theme-safe donation copy (avoids hardcoded black, invisible in dark mode)."""
+    classes = ["mdx-donation-title" if variant == "title" else "mdx-donation-text"]
+    if center:
+        classes.append("mdx-donation-center")
+    st.markdown(
+        f'<p class="{" ".join(classes)}">{text}</p>',
+        unsafe_allow_html=True,
+    )
+
+
 def render_donation_button(
     username: str = "geonosislaX", text: str = "Buy me a coffee", color: str = "#FFDD00"
 ) -> None:
@@ -82,26 +93,10 @@ def render_sidebar_donation(
 
     trans = translations.get(language, translations.get("English", {}))
 
-    # Header
-    st.markdown(
-        f"<h3 style='text-align: center; color: black;'>{trans.get('bmc_0', 'Support MDxApp')}</h3>",
-        unsafe_allow_html=True,
-    )
-
-    # Button text
-    st.markdown(
-        f"<h4 style='text-align: left; color: black;'>{trans.get('bmc_1', 'By clicking here:')}</h4>",
-        unsafe_allow_html=True,
-    )
-
-    # Button
+    _render_donation_text(trans.get("bmc_0", "Support MDxApp"), variant="title", center=True)
+    _render_donation_text(trans.get("bmc_1", "By clicking here:"))
     render_donation_button(username=username)
-
-    # QR code section
-    st.markdown(
-        f"<h4 style='text-align: left; color: black;'>{trans.get('bmc_2', 'Or use this QR code:')}</h4>",
-        unsafe_allow_html=True,
-    )
+    _render_donation_text(trans.get("bmc_2", "Or use this QR code:"))
 
     # QR code image
     if qr_image_path:
@@ -144,26 +139,12 @@ def render_inline_donation(
     if show_separator:
         st.markdown("---")
 
-    # Investment message
     if invest_message:
-        st.markdown(
-            f"<h4 style='text-align: left; color: black;'>{trans.get('invest', 'Support MDxApp!')}</h4>",
-            unsafe_allow_html=True,
-        )
+        _render_donation_text(trans.get("invest", "Support MDxApp!"), variant="title")
 
-    # Button section
-    st.markdown(
-        f"<h5 style='text-align: left; color: black;'>{trans.get('bmc_1', 'By clicking here:')}</h5>",
-        unsafe_allow_html=True,
-    )
-
+    _render_donation_text(trans.get("bmc_1", "By clicking here:"))
     render_donation_button(username=username)
-
-    # QR code section
-    st.markdown(
-        f"<h5 style='text-align: left; color: black;'>{trans.get('bmc_2', 'Or use this QR code:')}</h5>",
-        unsafe_allow_html=True,
-    )
+    _render_donation_text(trans.get("bmc_2", "Or use this QR code:"))
 
     if qr_image_path:
         render_donation_qr(qr_image_path)

@@ -138,6 +138,14 @@ Respond in {language}. Be specific, evidence-based, and prioritize patient safet
         Returns:
             str: System prompt for structured outputs
         """
+        from ..config.settings import get_settings
+
+        icd10_requirement = ""
+        if get_settings().enable_icd10_codes:
+            icd10_requirement = (
+                "- Provide icd10_primary code when possible and icd10_differentials list\n"
+            )
+
         prompt = f"""You are a medical diagnostic AI assistant providing structured diagnostic assessments.
 
 Role: Analyze patient information and provide comprehensive diagnostic evaluations.
@@ -148,9 +156,10 @@ Output Requirements:
 - List 3-5 recommended next steps
 - Highlight 2-4 important clinical considerations
 - Assess confidence level (high/medium/low)
-- Provide clear clinical reasoning
-- Provide icd10_primary code when possible and icd10_differentials list
-- Include 2-4 evidence_items with title, source, and pmid or url when known
+- Provide clear clinical reasoning in 2-4 concise sentences (do not use the full token budget on reasoning alone)
+{icd10_requirement}- Include 0-4 evidence_items only for real publications or guidelines you are confident about
+- For evidence_items: use accurate title and source; prefer numeric PubMed PMID over generic URLs
+- Do not invent PMIDs, URLs, or citations; omit evidence_items entirely if unsure
 - If medications are listed, include drug_interactions warnings when clinically relevant
 
 Clinical Guidelines:

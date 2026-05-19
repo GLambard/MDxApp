@@ -1,9 +1,9 @@
 # MDxApp - Executive Summary & Next Steps
 
 **Application:** Medical Diagnosis Assistant  
-**Version:** 2.0.0 (Modernized)  
-**Date:** October 2025  
-**Status:** v2.5 — Phase 2 complete (PDF export, evidence/ICD-10, 10 languages, imaging opt-in, drug interaction checks)
+**Version:** 2.5.0  
+**Date:** May 2026  
+**Status:** Phase 2 complete + polish (PDF, evidence, 10 languages, drug checks; imaging off; ICD-10 hidden by default)
 
 ---
 
@@ -68,7 +68,10 @@
 - ✅ Physical exam findings
 - ✅ Lab results integration
 - ✅ AI-powered diagnosis
-- ✅ Multi-language (5 languages)
+- ✅ Multi-language (10 languages)
+- ✅ PDF diagnosis report download
+- ✅ Educational references (sanitized links / PubMed)
+- ✅ Medication interaction warnings
 - ✅ Mobile-responsive UI
 
 **Privacy:**
@@ -404,11 +407,10 @@
 
 ### This Week
 
-1. **Review** this roadmap
-2. **Prioritize** features based on your goals
-3. **Test** GPT-5 Mini thoroughly
-4. **Plan** first feature sprint
-5. **Set up** monitoring
+1. **Deploy** with updated secrets (`openai_api_maxtok = 8000`, feature flags)
+2. **Smoke test** diagnosis → PDF → references → dark mode
+3. **Translation QA** per `docs/TRANSLATION_QA.md`
+4. **Monitor** OpenAI usage via logs (`log_openai_usage`) or sidebar (`show_usage_in_ui` in dev)
 
 ### Next Month
 
@@ -439,13 +441,13 @@
 **You have a solid, modern foundation.**  
 
 **Next logical steps:**
-1. ✅ **Stabilize** - Make sure GPT-5 Mini works perfectly
-2. 🔨 **Enhance** - Add structured diagnosis UI and imaging
-3. 🔨 **Expand** - More languages and PDF export
-4. 🔨 **Monetize** - API and tiered model for sustainability
-5. 🔨 **Scale** - Mobile app and global reach
+1. ✅ **Stabilize** — GPT-5 Mini structured path, token limits, session/PDF UX
+2. 🔨 **Deploy & QA** — Streamlit Cloud secrets, translation review, About page current
+3. 🔨 **Evidence quality** — ongoing; PMIDs preferred, no fabricated citations
+4. ⏸️ **Imaging** — keep disabled until clinical validation (`enable_medical_imaging`)
+5. 🔨 **Phase 3** — red flags, usage limits, or expanded languages (see `docs/PRODUCT_ORDER_PLAN.md`)
 
-**The modernization is complete. Now it's time to grow and make real impact!** 🚀
+**Foundation and Phase 2 are shipped. Focus: production reliability and user trust.** 🚀
 
 ---
 

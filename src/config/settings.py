@@ -22,14 +22,20 @@ class Settings:
         self.openai_model: str = st.secrets.get("openai_api_model", "gpt-5-mini")
         # Ignored for gpt-5* models (only default temperature supported)
         self.openai_temperature: float = float(st.secrets.get("openai_api_temp", 1.0))
-        self.openai_max_tokens: int = int(st.secrets.get("openai_api_maxtok", 2000))
+        # GPT-5: reasoning tokens count toward this limit; use >= 8000 for structured output.
+        self.openai_max_tokens: int = int(st.secrets.get("openai_api_maxtok", 8000))
         self.openai_frequency_penalty: float = float(st.secrets.get("openai_api_freqp", 0.0))
         self.openai_presence_penalty: float = float(st.secrets.get("openai_api_presp", 0.0))
         self.openai_timeout_seconds: float = float(st.secrets.get("openai_api_timeout", 120.0))
+        _env = str(st.secrets.get("environment", "production"))
+        self.log_openai_usage: bool = st.secrets.get("log_openai_usage", True)
+        self.show_usage_in_ui: bool = st.secrets.get(
+            "show_usage_in_ui", _env == "development"
+        )
 
         # Application Configuration
         self.app_title: str = "MDxApp - Medical Diagnosis Assistant"
-        self.app_version: str = "2.0.0"
+        self.app_version: str = str(st.secrets.get("app_version", "2.5.0"))
         self.app_icon: str = "🏥"
 
         # Contact Configuration
@@ -50,6 +56,8 @@ class Settings:
         # Phase 2 feature flags
         self.enable_pdf_export: bool = st.secrets.get("enable_pdf_export", True)
         self.enable_evidence_fields: bool = st.secrets.get("enable_evidence_fields", True)
+        # ICD-10 varies by region (WHO vs ICD-10-CM, etc.); off by default
+        self.enable_icd10_codes: bool = st.secrets.get("enable_icd10_codes", False)
         self.enable_medical_imaging: bool = st.secrets.get("enable_medical_imaging", False)
         self.enable_drug_interactions: bool = st.secrets.get("enable_drug_interactions", True)
 
@@ -75,6 +83,19 @@ class Settings:
             raise ValueError("Prompt words are required when use_gpt5_mini_prompts is false")
 
         return True
+
+    @property
+    def is_gpt5_model(self) -> bool:
+        """True when using a GPT-5 family model (reasoning shares completion token budget)."""
+        return "gpt-5" in self.openai_model.lower()
+
+    def effective_max_completion_tokens(self, *, structured: bool = False) -> int:
+        """Minimum completion budget so GPT-5 reasoning does not exhaust structured output."""
+        configured = self.openai_max_tokens
+        if not self.is_gpt5_model:
+            return configured
+        floor = 8_000 if structured else 6_000
+        return max(configured, floor)
 
     @property
     def is_development(self) -> bool:
