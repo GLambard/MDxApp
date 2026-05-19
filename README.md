@@ -31,8 +31,10 @@ Run locally:
 
 ```bash
 pip install -r requirements.txt
-streamlit run "MDxApp/01_🏥_Diagnosis_Assistant.py"
+streamlit run MDxApp/app.py
 ```
+
+Sidebar page names follow the selected language (via `st.navigation`). The legacy script `MDxApp/01_🏥_Diagnosis_Assistant.py` still works and uses the same entry.
 
 Patient's demographics, context, symptoms, observations, chronic conditions added to any relevant information 
 can all be entered in plain text in the app. The medical jargon with known abbreviations is fully supported. 

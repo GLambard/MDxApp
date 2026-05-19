@@ -1,6 +1,6 @@
 """
-Legacy entry point — delegates to app.py (localized navigation).
-Prefer: streamlit run MDxApp/app.py
+MDxApp entry point — localized sidebar page names via st.navigation.
+Run: streamlit run MDxApp/app.py
 """
 
 import sys

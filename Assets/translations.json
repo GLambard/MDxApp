@@ -118,7 +118,10 @@
     "contact_form_submit": "Send",
     "dx_evidence_none": "No verifiable references were provided for this case.",
     "error_openai_prefix": "OpenAI API error",
-    "error_invalid_patient": "Patient data is invalid"
+    "error_invalid_patient": "Patient data is invalid",
+    "nav_diagnosis": "Diagnosis Assistant",
+    "nav_about": "About",
+    "nav_contact": "Contact"
   },
   "Français": {
     "page1_title": "Assistant Diagnostic",
@@ -239,7 +242,10 @@
     "contact_form_submit": "Envoyer",
     "dx_evidence_none": "Aucune référence vérifiable n'a été fournie pour ce cas.",
     "error_openai_prefix": "Erreur API OpenAI",
-    "error_invalid_patient": "Données patient invalides"
+    "error_invalid_patient": "Données patient invalides",
+    "nav_diagnosis": "Assistant diagnostic",
+    "nav_about": "À propos",
+    "nav_contact": "Contact"
   },
   "日本語": {
     "page1_title": "診断アシスタント",
@@ -360,7 +366,10 @@
     "contact_form_submit": "送信",
     "dx_evidence_none": "この症例では検証可能な参考文献は提供されませんでした。",
     "error_openai_prefix": "OpenAI API エラー",
-    "error_invalid_patient": "患者データが無効です"
+    "error_invalid_patient": "患者データが無効です",
+    "nav_diagnosis": "診断アシスタント",
+    "nav_about": "概要",
+    "nav_contact": "お問い合わせ"
   },
   "Español": {
     "page1_title": "Asistente de diagnóstico",
@@ -481,7 +490,10 @@
     "contact_form_submit": "Enviar",
     "dx_evidence_none": "No se proporcionaron referencias verificables para este caso.",
     "error_openai_prefix": "Error de la API de OpenAI",
-    "error_invalid_patient": "Datos del paciente no válidos"
+    "error_invalid_patient": "Datos del paciente no válidos",
+    "nav_diagnosis": "Asistente de diagnóstico",
+    "nav_about": "Acerca de",
+    "nav_contact": "Contacto"
   },
   "Deutsch": {
     "page1_title": "Diagnose-Assistent",
@@ -602,7 +614,10 @@
     "contact_form_submit": "Senden",
     "dx_evidence_none": "Für diesen Fall wurden keine überprüfbaren Referenzen angegeben.",
     "error_openai_prefix": "OpenAI-API-Fehler",
-    "error_invalid_patient": "Ungültige Patientendaten"
+    "error_invalid_patient": "Ungültige Patientendaten",
+    "nav_diagnosis": "Diagnose-Assistent",
+    "nav_about": "Über uns",
+    "nav_contact": "Kontakt"
   },
   "中文": {
     "page1_title": "诊断助手",
@@ -723,7 +738,10 @@
     "contact_form_submit": "发送",
     "dx_evidence_none": "本病例未提供可核实的参考文献。",
     "error_openai_prefix": "OpenAI API 错误",
-    "error_invalid_patient": "患者数据无效"
+    "error_invalid_patient": "患者数据无效",
+    "nav_diagnosis": "诊断助手",
+    "nav_about": "关于",
+    "nav_contact": "联系"
   },
   "Português": {
     "page1_title": "Assistente de diagnóstico",
@@ -844,7 +862,10 @@
     "contact_form_submit": "Enviar",
     "dx_evidence_none": "Nenhuma referência verificável foi fornecida para este caso.",
     "error_openai_prefix": "Erro da API OpenAI",
-    "error_invalid_patient": "Dados do paciente inválidos"
+    "error_invalid_patient": "Dados do paciente inválidos",
+    "nav_diagnosis": "Assistente de diagnóstico",
+    "nav_about": "Sobre",
+    "nav_contact": "Contato"
   },
   "हिन्दी": {
     "page1_title": "निदान सहायक",
@@ -965,7 +986,10 @@
     "contact_form_submit": "भेजें",
     "dx_evidence_none": "इस मामले के लिए कोई सत्यापन योग्य संदर्भ प्रदान नहीं किए गए।",
     "error_openai_prefix": "OpenAI API त्रुटि",
-    "error_invalid_patient": "रोगी डेटा अमान्य है"
+    "error_invalid_patient": "रोगी डेटा अमान्य है",
+    "nav_diagnosis": "निदान सहायक",
+    "nav_about": "परिचय",
+    "nav_contact": "संपर्क"
   },
   "العربية": {
     "page1_title": "مساعد التشخيص",
@@ -1086,7 +1110,10 @@
     "contact_form_submit": "إرسال",
     "dx_evidence_none": "لم تُقدَّم مراجع قابلة للتحقق لهذه الحالة.",
     "error_openai_prefix": "خطأ في واجهة OpenAI",
-    "error_invalid_patient": "بيانات المريض غير صالحة"
+    "error_invalid_patient": "بيانات المريض غير صالحة",
+    "nav_diagnosis": "مساعد التشخيص",
+    "nav_about": "حول",
+    "nav_contact": "اتصل"
   },
   "Русский": {
     "page1_title": "Диагностический помощник",
@@ -1207,7 +1234,10 @@
     "contact_form_submit": "Отправить",
     "dx_evidence_none": "Для этого случая не предоставлены проверяемые ссылки.",
     "error_openai_prefix": "Ошибка API OpenAI",
-    "error_invalid_patient": "Недопустимые данные пациента"
+    "error_invalid_patient": "Недопустимые данные пациента",
+    "nav_diagnosis": "Диагностический помощник",
+    "nav_about": "О приложении",
+    "nav_contact": "Контакты"
   },
   "Italiano": {
     "page1_title": "Assistente diagnostico",
@@ -1328,7 +1358,10 @@
     "contact_form_submit": "Invia",
     "dx_evidence_none": "Non sono stati forniti riferimenti verificabili per questo caso.",
     "error_openai_prefix": "Errore API OpenAI",
-    "error_invalid_patient": "Dati paziente non validi"
+    "error_invalid_patient": "Dati paziente non validi",
+    "nav_diagnosis": "Assistente diagnostico",
+    "nav_about": "Informazioni",
+    "nav_contact": "Contatto"
   },
   "한국어": {
     "page1_title": "진단 도우미",
@@ -1449,7 +1482,10 @@
     "contact_form_submit": "보내기",
     "dx_evidence_none": "이 사례에 대해 검증 가능한 참고문헌이 제공되지 않았습니다.",
     "error_openai_prefix": "OpenAI API 오류",
-    "error_invalid_patient": "환자 데이터가 유효하지 않습니다"
+    "error_invalid_patient": "환자 데이터가 유효하지 않습니다",
+    "nav_diagnosis": "진단 도우미",
+    "nav_about": "소개",
+    "nav_contact": "문의"
   },
   "Türkçe": {
     "page1_title": "Tanı Asistanı",
@@ -1570,7 +1606,10 @@
     "contact_form_submit": "Gönder",
     "dx_evidence_none": "Bu vaka için doğrulanabilir kaynak sağlanmadı.",
     "error_openai_prefix": "OpenAI API hatası",
-    "error_invalid_patient": "Hasta verileri geçersiz"
+    "error_invalid_patient": "Hasta verileri geçersiz",
+    "nav_diagnosis": "Tanı asistanı",
+    "nav_about": "Hakkında",
+    "nav_contact": "İletişim"
   },
   "Tiếng Việt": {
     "page1_title": "Trợ lý chẩn đoán",
@@ -1691,7 +1730,10 @@
     "contact_form_submit": "Gửi",
     "dx_evidence_none": "Không có tài liệu tham khảo có thể xác minh cho ca này.",
     "error_openai_prefix": "Lỗi API OpenAI",
-    "error_invalid_patient": "Dữ liệu bệnh nhân không hợp lệ"
+    "error_invalid_patient": "Dữ liệu bệnh nhân không hợp lệ",
+    "nav_diagnosis": "Trợ lý chẩn đoán",
+    "nav_about": "Giới thiệu",
+    "nav_contact": "Liên hệ"
   },
   "Bahasa Indonesia": {
     "page1_title": "Asisten Diagnosis",
@@ -1812,6 +1854,9 @@
     "contact_form_submit": "Kirim",
     "dx_evidence_none": "Tidak ada referensi yang dapat diverifikasi untuk kasus ini.",
     "error_openai_prefix": "Kesalahan API OpenAI",
-    "error_invalid_patient": "Data pasien tidak valid"
+    "error_invalid_patient": "Data pasien tidak valid",
+    "nav_diagnosis": "Asisten diagnosis",
+    "nav_about": "Tentang",
+    "nav_contact": "Kontak"
   }
 }
