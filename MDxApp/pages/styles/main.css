@@ -70,6 +70,84 @@ div[class*="stTextInput"] > label > div[data-testid="stMarkdownContainer"] > p {
 }
 
 /* ============================================
+   Diagnosis: clinical reasoning block
+   ============================================ */
+
+/* Dark text on light panel (fixes white-on-grey in Streamlit dark theme) */
+p.mdx-clinical-reasoning {
+    color: #262730 !important;
+    background-color: #f0f0f0 !important;
+}
+
+/* Dark theme: light text on darker panel */
+[data-theme="dark"] p.mdx-clinical-reasoning {
+    color: #fafafa !important;
+    background-color: #31333f !important;
+    border-left-color: #b19cd9 !important;
+}
+
+/* Confidence badges */
+.mdx-confidence-badge {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 12px;
+    margin: 4px 0 12px 0;
+}
+.mdx-confidence-high {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #28a745;
+}
+.mdx-confidence-medium {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffc107;
+}
+.mdx-confidence-low {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #dc3545;
+}
+[data-theme="dark"] .mdx-confidence-high {
+    background-color: #1e4620;
+    color: #9ae6b0;
+    border-color: #38a169;
+}
+[data-theme="dark"] .mdx-confidence-medium {
+    background-color: #4a3f0a;
+    color: #faf089;
+    border-color: #d69e2e;
+}
+[data-theme="dark"] .mdx-confidence-low {
+    background-color: #4a1c1c;
+    color: #feb2b2;
+    border-color: #e53e3e;
+}
+p.mdx-consideration-item {
+    color: #262730;
+    margin: 0.25rem 0;
+}
+[data-theme="dark"] p.mdx-consideration-item {
+    color: #fafafa;
+}
+
+p.mdx-drug-alert {
+    color: #721c24;
+    background-color: #f8d7da;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border-left: 4px solid #dc3545;
+    margin: 4px 0;
+}
+[data-theme="dark"] p.mdx-drug-alert {
+    color: #feb2b2;
+    background-color: #4a1c1c;
+    border-left-color: #e53e3e;
+}
+
+/* ============================================
    Responsive Design (Future Enhancement)
    ============================================ */
 

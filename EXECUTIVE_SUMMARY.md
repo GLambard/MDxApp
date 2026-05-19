@@ -3,7 +3,7 @@
 **Application:** Medical Diagnosis Assistant  
 **Version:** 2.0.0 (Modernized)  
 **Date:** October 2025  
-**Status:** Phase 0–1 integrated — modular stack wired to Streamlit UI with GPT-5 Mini structured outputs
+**Status:** v2.5 — Phase 2 complete (PDF export, evidence/ICD-10, 10 languages, imaging opt-in, drug interaction checks)
 
 ---
 

@@ -49,6 +49,9 @@ class PatientData(BaseModel):
     lab_results: Optional[str] = Field(
         default=None, max_length=2000, description="Laboratory results"
     )
+    medications: Optional[str] = Field(
+        default=None, max_length=2000, description="Current medications list"
+    )
     language: str = Field(default="English", description="Preferred language")
 
     @field_validator("is_pregnant")

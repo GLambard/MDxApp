@@ -2,18 +2,26 @@
 Orchestrates diagnosis requests: settings, prompts, AI client, and formatted output.
 """
 
+import base64
 from typing import Any, Dict, Optional, Union
 
 from pydantic import BaseModel
 
 from ..config.settings import Settings, get_settings
-from ..core.ai_client import DiagnosisAIClient, DiagnosisAPIResult, LegacyAIClient
+from ..core.ai_client import (
+    DiagnosisAIClient,
+    DiagnosisAPIResult,
+    LegacyAIClient,
+    StructuredDiagnosisOutput,
+)
 from ..core.prompt_builder import PromptBuilder
 from ..core.prompts import GPT5MiniPrompts, create_enhanced_prompts
+from ..core.prompts_imaging import get_imaging_system_prompt
 from ..models.patient import PatientData
 from ..utils.logger import get_logger
+from .drug_interaction_service import enrich_drug_warnings
+from .evidence_utils import sanitize_evidence_items
 
-# Friendly messages for common OpenAI failures
 _ERROR_HINTS = {
     "authentication": "Invalid OpenAI API key. Check your secrets configuration.",
     "rate_limit": "OpenAI rate limit reached. Please wait a moment and try again.",
@@ -28,6 +36,8 @@ class DiagnosisResult(BaseModel):
     html_content: Optional[str] = None
     error_message: Optional[str] = None
     is_structured: bool = False
+    structured: Optional[StructuredDiagnosisOutput] = None
+    used_plain_fallback: bool = False
     metadata: Optional[Dict[str, Any]] = None
 
 
@@ -77,9 +87,17 @@ class DiagnosisService:
         return self._prompt_builder
 
     def _resolve_prompts(
-        self, patient_data: PatientData, language: str, user_prompt: str
+        self,
+        patient_data: PatientData,
+        language: str,
+        user_prompt: str,
+        has_image: bool = False,
     ) -> tuple[str, str]:
         """Choose system/user prompts based on feature flags."""
+        if has_image and self.settings.enable_medical_imaging:
+            system_prompt = get_imaging_system_prompt(language)
+            return system_prompt, user_prompt
+
         if self.settings.use_gpt5_mini_prompts:
             patient_dict = {
                 "gender": patient_data.gender,
@@ -89,6 +107,7 @@ class DiagnosisService:
                 "symptoms": patient_data.symptoms,
                 "exam_findings": patient_data.exam_findings or "none",
                 "lab_results": patient_data.lab_results or "none",
+                "medications": patient_data.medications or "none",
             }
             return create_enhanced_prompts(
                 patient_dict,
@@ -99,6 +118,26 @@ class DiagnosisService:
         if self.settings.use_structured_outputs:
             system_prompt = GPT5MiniPrompts.get_structured_system_prompt(language)
         return system_prompt, user_prompt
+
+    def _build_user_prompt(self, patient_data: PatientData, language: str) -> str:
+        builder = self._get_prompt_builder()
+        prompt = builder.build_user_prompt(patient_data, language)
+        if patient_data.medications and patient_data.medications.strip():
+            prompt += f"\n\nCurrent medications: {patient_data.medications.strip()}"
+        return prompt
+
+    def _finalize_structured(
+        self, structured: StructuredDiagnosisOutput, patient_data: PatientData
+    ) -> StructuredDiagnosisOutput:
+        """Post-process structured output (evidence, drug checks)."""
+        if self.settings.enable_evidence_fields and structured.evidence_items:
+            structured.evidence_items = sanitize_evidence_items(structured.evidence_items)
+
+        if self.settings.enable_drug_interactions and patient_data.medications:
+            structured.drug_interactions = enrich_drug_warnings(
+                patient_data.medications, list(structured.drug_interactions)
+            )
+        return structured
 
     @staticmethod
     def _friendly_error(raw: Optional[str]) -> str:
@@ -118,52 +157,68 @@ class DiagnosisService:
         patient_data: PatientData,
         language: str,
         translations: Optional[Dict[str, str]] = None,
+        image_bytes: Optional[bytes] = None,
+        image_mime_type: Optional[str] = None,
     ) -> DiagnosisResult:
-        """
-        Execute diagnosis for validated patient data.
-
-        Args:
-            patient_data: Validated patient information
-            language: UI language key (e.g. English, Français)
-            translations: Translation dict for current language (structured HTML labels)
-
-        Returns:
-            DiagnosisResult with HTML content or error message
-        """
+        """Execute diagnosis for validated patient data."""
         from ..components.diagnosis_display import format_structured_diagnosis_html
 
         trans = translations or self.translations.get(language, {})
-        builder = self._get_prompt_builder()
-        user_prompt = builder.build_user_prompt(patient_data, language)
-        system_prompt, user_prompt = self._resolve_prompts(patient_data, language, user_prompt)
+        user_prompt = self._build_user_prompt(patient_data, language)
+        has_image = bool(
+            image_bytes
+            and self.settings.enable_medical_imaging
+            and self.settings.use_new_ai_client
+        )
+        system_prompt, user_prompt = self._resolve_prompts(
+            patient_data, language, user_prompt, has_image=has_image
+        )
 
         client = self._get_client()
+        used_fallback = False
 
-        # Structured path (modern client with parse support)
         if self.settings.use_structured_outputs and self.settings.use_new_ai_client:
             structured_fn = getattr(client, "get_structured_diagnosis", None)
+            multimodal_fn = getattr(client, "get_structured_diagnosis_with_image", None)
             if callable(structured_fn):
-                api_result = structured_fn(system_prompt, user_prompt)
-                if isinstance(api_result, DiagnosisAPIResult):
-                    if api_result.success and api_result.structured:
-                        html = format_structured_diagnosis_html(api_result.structured, trans)
-                        return DiagnosisResult(
-                            success=True,
-                            html_content=html,
-                            is_structured=True,
-                        )
-                    if api_result.error_message:
-                        self.logger.warning(
-                            "Structured diagnosis failed, falling back to plain: %s",
-                            api_result.error_message,
-                        )
+                if has_image and image_bytes and callable(multimodal_fn):
+                    b64 = base64.standard_b64encode(image_bytes).decode("ascii")
+                    api_result = multimodal_fn(
+                        system_prompt,
+                        user_prompt,
+                        b64,
+                        mime_type=image_mime_type or "image/jpeg",
+                    )
+                else:
+                    api_result = structured_fn(system_prompt, user_prompt)
 
-        # Plain text path
+                if api_result.success and api_result.structured:
+                    structured = self._finalize_structured(api_result.structured, patient_data)
+                    html = format_structured_diagnosis_html(structured, trans)
+                    return DiagnosisResult(
+                        success=True,
+                        html_content=html,
+                        is_structured=True,
+                        structured=structured,
+                        used_plain_fallback=False,
+                    )
+                if api_result.error_message:
+                    used_fallback = True
+                    self.logger.warning(
+                        "Structured diagnosis failed, falling back to plain: %s",
+                        api_result.error_message,
+                    )
+
         plain_result = client.get_diagnosis(system_prompt, user_prompt)
         if isinstance(plain_result, DiagnosisAPIResult):
             if plain_result.success and plain_result.content:
                 cleaned = plain_result.content.replace("<|im_end|>", "").strip()
-                return DiagnosisResult(success=True, html_content=cleaned, is_structured=False)
+                return DiagnosisResult(
+                    success=True,
+                    html_content=cleaned,
+                    is_structured=False,
+                    used_plain_fallback=used_fallback,
+                )
             return DiagnosisResult(
                 success=False,
                 error_message=self._friendly_error(plain_result.error_message),
@@ -171,7 +226,12 @@ class DiagnosisService:
 
         if plain_result:
             cleaned = str(plain_result).replace("<|im_end|>", "").strip()
-            return DiagnosisResult(success=True, html_content=cleaned, is_structured=False)
+            return DiagnosisResult(
+                success=True,
+                html_content=cleaned,
+                is_structured=False,
+                used_plain_fallback=used_fallback,
+            )
 
         return DiagnosisResult(
             success=False,

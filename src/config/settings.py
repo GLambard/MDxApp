@@ -47,6 +47,12 @@ class Settings:
         self.use_structured_outputs: bool = st.secrets.get("use_structured_outputs", True)
         self.use_gpt5_mini_prompts: bool = st.secrets.get("use_gpt5_mini_prompts", True)
 
+        # Phase 2 feature flags
+        self.enable_pdf_export: bool = st.secrets.get("enable_pdf_export", True)
+        self.enable_evidence_fields: bool = st.secrets.get("enable_evidence_fields", True)
+        self.enable_medical_imaging: bool = st.secrets.get("enable_medical_imaging", False)
+        self.enable_drug_interactions: bool = st.secrets.get("enable_drug_interactions", True)
+
         # Donation Configuration
         self.bmc_username: str = "geonosislaX"
 

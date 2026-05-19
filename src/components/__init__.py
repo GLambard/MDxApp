@@ -1,6 +1,11 @@
 """Reusable UI components for MDxApp."""
 
-from .diagnosis_display import format_structured_diagnosis_html, render_diagnosis_result
+from .diagnosis_display import (
+    format_structured_diagnosis_html,
+    render_diagnosis_result,
+    render_structured_diagnosis,
+    structured_from_session,
+)
 from .donation import (
     get_default_qr_path,
     render_donation_button,
@@ -51,4 +56,6 @@ __all__ = [
     # Diagnosis display
     "format_structured_diagnosis_html",
     "render_diagnosis_result",
+    "render_structured_diagnosis",
+    "structured_from_session",
 ]

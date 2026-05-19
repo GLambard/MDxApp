@@ -14,12 +14,17 @@ path = os.path.dirname(__file__)
 project_root = Path(path).parent
 sys.path.insert(0, str(project_root))
 
-from src.components.diagnosis_display import render_diagnosis_result
+from src.components.diagnosis_display import (
+    render_diagnosis_result,
+    render_pdf_download_button,
+    structured_from_session,
+)
 from src.components.donation import (
     get_default_qr_path,
     render_inline_donation,
     render_sidebar_donation,
 )
+from src.components.image_upload import render_image_upload
 from src.components.language_selector import add_language_separator, render_language_selector
 from src.components.patient_form import (
     build_patient_from_session,
@@ -28,6 +33,7 @@ from src.components.patient_form import (
     render_patient_summary,
     validate_minimum_data,
 )
+from src.config.settings import get_settings
 from src.services.diagnosis_service import get_diagnosis_service
 from src.utils.styling import load_main_styles
 
@@ -78,6 +84,11 @@ st.subheader(f":black_nib: **{transl[lang]['report_header']}**")
 render_patient_demographics(transl[lang], language=lang)
 render_medical_history_fields(transl[lang], language=lang)
 
+settings = get_settings()
+image_bytes, image_mime, _image_type = None, None, None
+if settings.enable_medical_imaging:
+    image_bytes, image_mime, _image_type = render_image_upload(transl[lang])
+
 patient_data = build_patient_from_session(transl[lang], language=lang)
 
 st.subheader(f":clipboard: **{transl[lang]['summary']}**")
@@ -102,12 +113,34 @@ if submit_button:
         with st.spinner(transl[lang]["submit_wait"]):
             try:
                 service = get_diagnosis_service(translations=transl)
-                result = service.run(patient_data, lang, translations=transl[lang])
+                result = service.run(
+                    patient_data,
+                    lang,
+                    translations=transl[lang],
+                    image_bytes=image_bytes,
+                    image_mime_type=image_mime,
+                )
 
                 if result.success and result.html_content:
                     st.session_state.diagnostic = result.html_content
+                    st.session_state.diagnostic_structured = (
+                        result.structured.model_dump() if result.structured else None
+                    )
+                    st.session_state.diagnostic_fallback = result.used_plain_fallback
                     st.write("")
-                    render_diagnosis_result(result.html_content)
+                    render_diagnosis_result(
+                        html_content=result.html_content,
+                        structured=result.structured,
+                        translations=transl[lang],
+                        used_plain_fallback=result.used_plain_fallback,
+                    )
+                    render_pdf_download_button(
+                        patient=patient_data,
+                        translations=transl[lang],
+                        structured=result.structured,
+                        plain_html=result.html_content,
+                        logo_path=project_root / "Materials" / "MDxApp_logo_v2_256.png",
+                    )
                 elif result.error_message:
                     st.error(f"OpenAI API Error: {result.error_message}")
                     st.write(
@@ -141,7 +174,22 @@ if submit_button:
                 )
 else:
     if "diagnostic" in st.session_state:
-        render_diagnosis_result(st.session_state.diagnostic.replace("<|im_end|>", ""))
+        structured = structured_from_session(st.session_state.get("diagnostic_structured"))
+        html = st.session_state.diagnostic.replace("<|im_end|>", "")
+        render_diagnosis_result(
+            html_content=html,
+            structured=structured,
+            translations=transl[lang],
+            used_plain_fallback=st.session_state.get("diagnostic_fallback", False),
+        )
+        if patient_data:
+            render_pdf_download_button(
+                patient=patient_data,
+                translations=transl[lang],
+                structured=structured,
+                plain_html=html,
+                logo_path=project_root / "Materials" / "MDxApp_logo_v2_256.png",
+            )
     else:
         st.write(
             f'<p style="font-weight: bold; font-size:18px;">{transl[lang]["no_diagnostic"]}</p>',

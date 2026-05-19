@@ -13,6 +13,9 @@ pydantic-settings>=2.5.0      # Settings management (new)
 # Environment management
 python-dotenv>=1.0.0          # Load .env files (new)
 
+# PDF export (Phase 2A)
+reportlab>=4.0.0              # In-memory PDF reports
+
 # Note: For backward compatibility during migration, you can temporarily
 # install both old and new versions:
 # openai==0.27.0  # Legacy version (remove after migration)

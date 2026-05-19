@@ -132,7 +132,22 @@ def render_medical_history_fields(
         help=f":green[**{trans['lab_help']}**]",
     )
 
-    return {"history": history, "symptoms": symptoms, "exam": exam, "lab_results": lab_results}
+    # Medications (optional, Phase 2E)
+    medications = st.text_input(
+        f"**{trans.get('medications', 'Medications')}** *{trans.get('meds_example', '(optional)')}*",
+        placeholder=trans.get("meds_ph", "none"),
+        key="medications",
+        max_chars=2000,
+        help=f":green[**{trans.get('meds_help', 'List current medications')}**]",
+    )
+
+    return {
+        "history": history,
+        "symptoms": symptoms,
+        "exam": exam,
+        "lab_results": lab_results,
+        "medications": medications,
+    }
 
 
 def collect_patient_data(
@@ -161,6 +176,8 @@ def collect_patient_data(
     symptoms = medical_data["symptoms"] if medical_data["symptoms"] else ""
     exam = medical_data["exam"] if medical_data["exam"] else None
     lab_results = medical_data["lab_results"] if medical_data["lab_results"] else None
+    medications = medical_data.get("medications") or None
+    medications = medications if medications else None
 
     # Create PatientData with validation
     try:
@@ -172,6 +189,7 @@ def collect_patient_data(
             symptoms=symptoms,
             exam_findings=exam,
             lab_results=lab_results,
+            medications=medications,
             language=language,
         )
         return patient_data
@@ -238,6 +256,7 @@ def build_patient_from_session(
     symptoms = st.session_state.get("symptoms") or ""
     exam = st.session_state.get("exam") or None
     lab_results = st.session_state.get("labresults") or None
+    medications = st.session_state.get("medications") or None
 
     try:
         return PatientData(
@@ -248,6 +267,7 @@ def build_patient_from_session(
             symptoms=symptoms,
             exam_findings=exam if exam else None,
             lab_results=lab_results if lab_results else None,
+            medications=medications if medications else None,
             language=language,
         )
     except ValidationError as e:

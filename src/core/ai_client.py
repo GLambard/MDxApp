@@ -26,6 +26,15 @@ class DiagnosisAPIResult:
     error_message: Optional[str] = None
 
 
+class EvidenceItem(BaseModel):
+    """Medical literature or guideline reference."""
+
+    title: str = Field(description="Reference title")
+    source: str = Field(description="Source name e.g. PubMed, WHO")
+    url: Optional[str] = Field(default=None, description="Optional URL")
+    pmid: Optional[str] = Field(default=None, description="PubMed ID if available")
+
+
 class StructuredDiagnosisOutput(BaseModel):
     """
     Structured output format for medical diagnosis.
@@ -48,6 +57,25 @@ class StructuredDiagnosisOutput(BaseModel):
         description="Confidence level in the primary diagnosis"
     )
     reasoning: str = Field(description="Brief explanation of the diagnostic reasoning")
+    # Phase 2B — evidence (optional)
+    icd10_primary: Optional[str] = Field(default=None, description="ICD-10 for primary diagnosis")
+    icd10_differentials: list[str] = Field(
+        default_factory=list, description="ICD-10 codes for differentials"
+    )
+    evidence_items: list[EvidenceItem] = Field(
+        default_factory=list, description="2-4 evidence-based references"
+    )
+    # Phase 2C — imaging (optional)
+    imaging_findings: Optional[str] = Field(
+        default=None, description="Findings from uploaded medical image if provided"
+    )
+    # Phase 2E — medications (optional)
+    drug_interactions: list[str] = Field(
+        default_factory=list, description="Medication interaction warnings"
+    )
+    medication_notes: Optional[str] = Field(
+        default=None, description="Additional medication safety notes"
+    )
 
 
 class DiagnosisAIClient:
@@ -242,6 +270,46 @@ class DiagnosisAIClient:
             return DiagnosisAPIResult(success=False, error_message=self._error_message(e))
         except Exception as e:
             self.logger.error("Unexpected error during structured diagnosis: %s", e)
+            return DiagnosisAPIResult(success=False, error_message=self._error_message(e))
+
+    def get_structured_diagnosis_with_image(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        image_base64: str,
+        mime_type: str = "image/jpeg",
+        **kwargs: Any,
+    ) -> DiagnosisAPIResult:
+        """Structured diagnosis with one vision image (GPT-5 Mini multimodal)."""
+        max_completion_tokens = kwargs.get("max_completion_tokens", self.max_completion_tokens)
+        data_url = f"data:{mime_type};base64,{image_base64}"
+
+        try:
+            self.logger.info("Requesting multimodal structured diagnosis")
+            params: Dict[str, Any] = {
+                "model": self.model,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": user_prompt},
+                            {"type": "image_url", "image_url": {"url": data_url}},
+                        ],
+                    },
+                ],
+                "response_format": StructuredDiagnosisOutput,
+                "max_completion_tokens": max_completion_tokens,
+            }
+            completion = self.client.beta.chat.completions.parse(**params)
+            diagnosis_output = completion.choices[0].message.parsed
+            if diagnosis_output:
+                return DiagnosisAPIResult(success=True, structured=diagnosis_output)
+            return DiagnosisAPIResult(
+                success=False, error_message="Multimodal structured parse returned no data."
+            )
+        except Exception as e:
+            self.logger.error("Multimodal diagnosis error: %s", e)
             return DiagnosisAPIResult(success=False, error_message=self._error_message(e))
 
     def format_structured_diagnosis(

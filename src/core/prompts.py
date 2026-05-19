@@ -149,6 +149,9 @@ Output Requirements:
 - Highlight 2-4 important clinical considerations
 - Assess confidence level (high/medium/low)
 - Provide clear clinical reasoning
+- Provide icd10_primary code when possible and icd10_differentials list
+- Include 2-4 evidence_items with title, source, and pmid or url when known
+- If medications are listed, include drug_interactions warnings when clinically relevant
 
 Clinical Guidelines:
 - Base assessments on evidence-based medicine
@@ -198,5 +201,8 @@ def create_enhanced_prompts(
         lab_results=patient_data.get("lab_results", "none"),
         language=language,
     )
+    meds = patient_data.get("medications", "none")
+    if meds and meds != "none":
+        user_prompt += f"\n\n## Medications\n{meds}"
 
     return system_prompt, user_prompt
