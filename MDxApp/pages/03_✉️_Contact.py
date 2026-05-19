@@ -1,4 +1,3 @@
-import json
 import os
 import sys
 from pathlib import Path
@@ -11,6 +10,7 @@ sys.path.insert(0, str(project_root))
 
 from src.components.localized_pages import render_contact_page, render_page_sidebar
 from src.utils.styling import load_main_styles
+from src.utils.translations_loader import load_app_translations
 
 
 def local_css(file_name: str) -> None:
@@ -22,8 +22,7 @@ def local_css(file_name: str) -> None:
 st.set_page_config(page_title="Contact", page_icon="✉️")
 load_main_styles(project_root)
 
-with open(project_root / "Assets" / "translations.json", encoding="utf-8") as f:
-    transl = json.load(f)
+transl = load_app_translations()
 
 lang = render_page_sidebar(transl, project_root)
 render_contact_page(transl, lang, st.secrets["email_address"])

@@ -30,55 +30,44 @@ def render_patient_demographics(
     if "disabled" not in st.session_state:
         st.session_state.disabled = False
 
-    # Create gender and pregnancy option lists
-    genders_list = [trans["male"], trans["female"]]
-    pregnant_list = [trans["no"], trans["yes"]]
+    # Canonical codes in session (language-independent); labels via format_func
+    if "gender_code" not in st.session_state:
+        st.session_state.gender_code = "male"
+    if "pregnant_code" not in st.session_state:
+        st.session_state.pregnant_code = "no"
 
-    # Create three columns
     col1, col2, col3 = st.columns(3, gap="large")
 
-    # Gender selector
     with col1:
-        # Handle language change by resetting gender if needed
-        if "lang_changed" in st.session_state and st.session_state["lang_changed"]:
-            if "gender" in st.session_state:
-                del st.session_state["gender"]
+        gender_code = st.radio(
+            f"**{trans['gender']}**",
+            options=["male", "female"],
+            format_func=lambda code: trans["male"] if code == "male" else trans["female"],
+            key="gender_code",
+            horizontal=True,
+        )
 
-        if "gender" not in st.session_state:
-            st.session_state["gender"] = genders_list[0]
-
-        gender = st.radio(f"**{trans['gender']}**", genders_list, key="gender")
-
-    # Age selector
     with col2:
         age = st.number_input(f"**{trans['age']}**", min_value=0, max_value=99, step=1, key="age")
 
-    # Pregnancy selector (disabled for males)
-    # Check if male and disable pregnancy field
-    if st.session_state.gender == trans["male"]:
-        st.session_state.disabled = True
-        if "pregnant" in st.session_state:
-            st.session_state["pregnant"] = trans["no"]
-    else:
-        st.session_state.disabled = False
+    is_male = gender_code == "male"
+    st.session_state.disabled = is_male
+    if is_male:
+        st.session_state.pregnant_code = "no"
 
     with col3:
-        # Handle language change
-        if "lang_changed" in st.session_state and st.session_state["lang_changed"]:
-            if "pregnant" in st.session_state:
-                del st.session_state["pregnant"]
-
-        if "pregnant" not in st.session_state:
-            st.session_state["pregnant"] = pregnant_list[0]
-
-        pregnancy = st.radio(
+        pregnancy_code = st.radio(
             f"**{trans['pregnant']}**",
-            pregnant_list,
+            options=["no", "yes"],
+            format_func=lambda code: trans["no"] if code == "no" else trans["yes"],
+            key="pregnant_code",
             disabled=st.session_state.disabled,
-            key="pregnant",
+            horizontal=True,
         )
 
-    return gender, age, pregnancy
+    gender_label = trans["male"] if gender_code == "male" else trans["female"]
+    pregnancy_label = trans["no"] if pregnancy_code == "no" else trans["yes"]
+    return gender_label, age, pregnancy_label
 
 
 def render_medical_history_fields(
@@ -259,10 +248,14 @@ def build_patient_from_session(
     medications = st.session_state.get("medications") or None
 
     try:
+        gender_code = st.session_state.get("gender_code", "male")
+        pregnant_code = st.session_state.get("pregnant_code", "no")
+        gender_label = trans["male"] if gender_code == "male" else trans["female"]
+        pregnant_label = trans["no"] if pregnant_code == "no" else trans["yes"]
         return PatientData(
-            gender=st.session_state.get("gender", trans["male"]),
+            gender=gender_label,
             age=int(st.session_state.get("age", 0)),
-            is_pregnant=st.session_state.get("pregnant", trans["no"]),
+            is_pregnant=pregnant_label,
             history=history if history else None,
             symptoms=symptoms,
             exam_findings=exam if exam else None,
@@ -289,7 +282,7 @@ def validate_minimum_data(
         bool: True if valid, False otherwise (displays error)
     """
     if patient_data is None:
-        st.error("Patient data is invalid")
+        st.error(translations.get("error_invalid_patient", "Patient data is invalid"))
         return False
 
     if not patient_data.has_minimum_data():

@@ -3,7 +3,6 @@ Medical Diagnosis Assistant — main Streamlit page.
 Thin orchestrator: components + DiagnosisService (no inline OpenAI calls).
 """
 
-import json
 import os
 import sys
 from pathlib import Path
@@ -116,9 +115,9 @@ def _render_stored_diagnosis(
     return True
 
 
-# Load translations
-with open(path + "/../Assets/translations.json", encoding="utf-8") as f:
-    transl = json.load(f)
+from src.utils.translations_loader import load_app_translations
+
+transl = load_app_translations()
 
 st.set_page_config(page_title="Diagnosis_Assistant", page_icon="🏥", layout="wide")
 load_main_styles(project_root)
@@ -201,7 +200,7 @@ if submit_button:
                 if result.success and result.html_content:
                     _persist_diagnosis_result(result)
                 elif result.error_message:
-                    st.error(f"OpenAI API Error: {result.error_message}")
+                    st.error(f"{transl[lang]['error_openai_prefix']}: {result.error_message}")
                     st.write(
                         f'<p style="font-weight: bold; font-size:18px;">{transl[lang]["no_response"]}</p>',
                         unsafe_allow_html=True,
@@ -212,7 +211,7 @@ if submit_button:
                         unsafe_allow_html=True,
                     )
             except Exception as exc:
-                st.error(f"OpenAI API Error: {exc}")
+                st.error(f"{transl[lang]['error_openai_prefix']}: {exc}")
                 st.write(
                     f'<p style="font-weight: bold; font-size:18px;">{transl[lang]["no_response"]}</p>',
                     unsafe_allow_html=True,

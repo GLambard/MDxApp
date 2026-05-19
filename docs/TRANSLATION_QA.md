@@ -14,8 +14,18 @@ English, Français, Español, Deutsch, Italiano, Português, 中文, 日本語, 
 - [ ] About / Contact pages match selected sidebar language
 - [ ] Submit flow and caution disclaimer clear
 
+## Regenerate packs
+
+After editing locale data:
+
+```bash
+python3 scripts/merge_locale_packs.py
+```
+
 ## Smoke test
 
-1. Select language in sidebar
-2. Submit sample case
-3. Verify structured sections and PDF button label
+1. Select language in sidebar (page should refresh; labels update)
+2. Verify form labels (gender, symptoms, submit) are translated
+3. Open About and Contact — content matches selected language
+4. Submit sample case on Diagnosis page
+5. Verify structured sections and PDF button label

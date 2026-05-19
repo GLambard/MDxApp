@@ -1,4 +1,3 @@
-import json
 import os
 import sys
 from pathlib import Path
@@ -12,12 +11,12 @@ sys.path.insert(0, str(project_root))
 from src.components.localized_pages import render_about_page, render_page_sidebar
 from src.config.settings import get_settings
 from src.utils.styling import load_main_styles
+from src.utils.translations_loader import load_app_translations
 
 st.set_page_config(page_title="About", page_icon="📰", layout="wide")
 load_main_styles(project_root)
 
-with open(project_root / "Assets" / "translations.json", encoding="utf-8") as f:
-    transl = json.load(f)
+transl = load_app_translations()
 
 settings = get_settings()
 lang = render_page_sidebar(transl, project_root)

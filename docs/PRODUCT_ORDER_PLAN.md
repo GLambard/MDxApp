@@ -22,7 +22,8 @@
 
 ### Recent polish (2026)
 - Default model **`gpt-5.4-nano`** (`openai_api_model` in `.streamlit/secrets.toml`)
-- **15 languages**, Arabic RTL, localized About/Contact (shared sidebar language selector)
+- **15 languages** with full UI packs (`scripts/i18n_locale_packs.py` → `python3 scripts/merge_locale_packs.py`)
+- Arabic RTL; localized About/Contact; language switch triggers `st.rerun()`
 - About page updated for v2.5
 - Evidence sanitization (PubMed URLs, dedupe, no fabricated links in prompt)
 - OpenAI token usage logging + optional sidebar display

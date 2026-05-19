@@ -62,12 +62,14 @@ def render_language_selector(
     else:
         selected_lang = st.selectbox(label, options=available_languages, key=key)
 
-    # Track language changes
-    if selected_lang != st.session_state.get("lang_tmp", "English"):
+    # Track language changes and rerun so all widgets reload translated labels
+    previous = st.session_state.get("lang_tmp", "English")
+    if selected_lang != previous:
         st.session_state["lang_tmp"] = selected_lang
         st.session_state["lang_changed"] = True
-    else:
-        st.session_state["lang_changed"] = False
+        handle_language_change()
+        st.rerun()
+    st.session_state["lang_changed"] = False
 
     return selected_lang
 
@@ -100,7 +102,7 @@ def clear_language_dependent_state() -> None:
     Useful when language changes to reset form values.
     """
     # List of keys to clear when language changes
-    language_dependent_keys = ["gender", "pregnant"]
+    language_dependent_keys = ["gender", "pregnant", "gender_code", "pregnant_code"]
 
     for key in language_dependent_keys:
         if key in st.session_state:
