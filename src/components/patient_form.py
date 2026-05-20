@@ -10,6 +10,47 @@ from pydantic import ValidationError
 
 from ..models.patient import PatientData
 
+# Narrative fields (symptoms, history, etc.): vertical growth for long mobile input
+_NARRATIVE_MIN_HEIGHT_PX = 72
+_NARRATIVE_LINE_HEIGHT_PX = 22
+_NARRATIVE_CHARS_PER_LINE = 48
+_NARRATIVE_MAX_HEIGHT_PX = 400
+
+
+def narrative_text_area_height(value: str) -> int:
+    """
+    Compute st.text_area height from current text so content stays visible on phones.
+    Recalculates each rerun as the user types.
+    """
+    text = value or ""
+    if not text.strip():
+        return _NARRATIVE_MIN_HEIGHT_PX
+    line_count = text.count("\n") + 1
+    wrapped_lines = max(line_count, (len(text) + _NARRATIVE_CHARS_PER_LINE - 1) // _NARRATIVE_CHARS_PER_LINE)
+    return min(
+        max(_NARRATIVE_MIN_HEIGHT_PX, wrapped_lines * _NARRATIVE_LINE_HEIGHT_PX + 16),
+        _NARRATIVE_MAX_HEIGHT_PX,
+    )
+
+
+def _render_narrative_field(
+    label: str,
+    placeholder: str,
+    session_key: str,
+    help_text: str,
+    max_chars: int = 2000,
+) -> str:
+    """Full-width text area that grows vertically with entered text."""
+    current = st.session_state.get(session_key, "")
+    return st.text_area(
+        label,
+        placeholder=placeholder,
+        key=session_key,
+        height=narrative_text_area_height(current if isinstance(current, str) else ""),
+        max_chars=max_chars,
+        help=help_text,
+    )
+
 
 def format_patient_validation_error(
     translations: Dict[str, Any], error: ValidationError
@@ -109,49 +150,40 @@ def render_medical_history_fields(
     """
     trans = translations
 
-    # History/Context
-    history = st.text_input(
+    # Narrative fields: multi-line, auto-growing height (better on smartphones)
+    history = _render_narrative_field(
         f"**{trans['history']}** *{trans['hist_example']}*",
-        placeholder=trans["hist_ph"],
-        key="context",
-        max_chars=2000,
-        help=f":green[**{trans['hist_help']}**]",
+        trans["hist_ph"],
+        "context",
+        f":green[**{trans['hist_help']}**]",
     )
 
-    # Symptoms (required)
-    symptoms = st.text_input(
+    symptoms = _render_narrative_field(
         f"**{trans['symptoms']}** *{trans['symp_example']}*",
-        placeholder=trans["symp_ph"],
-        key="symptoms",
-        max_chars=2000,
-        help=f":green[**{trans['symp_help']}**]",
+        trans["symp_ph"],
+        "symptoms",
+        f":green[**{trans['symp_help']}**]",
     )
 
-    # Examination findings
-    exam = st.text_input(
+    exam = _render_narrative_field(
         f"**{trans['exam']}** *{trans['exam_example']}*",
-        placeholder=trans["exam_ph"],
-        key="exam",
-        max_chars=2000,
-        help=f":green[**{trans['exam_help']}**]",
+        trans["exam_ph"],
+        "exam",
+        f":green[**{trans['exam_help']}**]",
     )
 
-    # Laboratory results
-    lab_results = st.text_input(
+    lab_results = _render_narrative_field(
         f"**{trans['lab']}** *{trans['lab_example']}*",
-        placeholder=trans["lab_ph"],
-        key="labresults",
-        max_chars=2000,
-        help=f":green[**{trans['lab_help']}**]",
+        trans["lab_ph"],
+        "labresults",
+        f":green[**{trans['lab_help']}**]",
     )
 
-    # Medications (optional, Phase 2E)
-    medications = st.text_input(
+    medications = _render_narrative_field(
         f"**{trans.get('medications', 'Medications')}** *{trans.get('meds_example', '(optional)')}*",
-        placeholder=trans.get("meds_ph", "none"),
-        key="medications",
-        max_chars=2000,
-        help=f":green[**{trans.get('meds_help', 'List current medications')}**]",
+        trans.get("meds_ph", "none"),
+        "medications",
+        f":green[**{trans.get('meds_help', 'List current medications')}**]",
     )
 
     return {

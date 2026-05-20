@@ -69,6 +69,19 @@ div[class*="stTextInput"] > label > div[data-testid="stMarkdownContainer"] > p {
     font-size: 18px;
 }
 
+/* Narrative fields (symptoms, history, etc.): full width, readable multi-line input */
+div[class*="stTextArea"] > label > div[data-testid="stMarkdownContainer"] > p {
+    font-size: 18px;
+}
+
+[data-testid="stTextArea"] textarea {
+    width: 100% !important;
+    line-height: 1.5;
+    resize: vertical;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
 /* ============================================
    Diagnosis: clinical reasoning block
    ============================================ */
@@ -207,7 +220,8 @@ p.mdx-drug-alert {
     /* Reduce font sizes on mobile */
     div[class*="stRadio"] > label > div[data-testid="stMarkdownContainer"] > p,
     div[class*="stNumberInput"] > label > div[data-testid="stMarkdownContainer"] > p,
-    div[class*="stTextInput"] > label > div[data-testid="stMarkdownContainer"] > p {
+    div[class*="stTextInput"] > label > div[data-testid="stMarkdownContainer"] > p,
+    div[class*="stTextArea"] > label > div[data-testid="stMarkdownContainer"] > p {
         font-size: 16px;
     }
     
